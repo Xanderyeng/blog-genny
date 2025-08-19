@@ -4,6 +4,7 @@ import { Inter, Roboto_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { QueryProviders } from "@/components/providers/query-providers"
+import { AuthProvider } from "@/components/providers/auth-provider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,11 +28,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${roboto_mono.variable}`}>
-      <ThemeProvider defaultTheme="system" storageKey="blog-genny-theme">
-        <QueryProviders>
-          <body>{children}</body>
-        </QueryProviders>
-      </ThemeProvider>
+      <body>
+        <AuthProvider>
+          <ThemeProvider defaultTheme="system" storageKey="blog-genny-theme">
+            <QueryProviders>
+              {children}
+            </QueryProviders>
+          </ThemeProvider>
+        </AuthProvider>
+      </body>
     </html>
   )
 }

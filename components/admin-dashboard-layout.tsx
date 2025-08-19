@@ -5,11 +5,12 @@ import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { LayoutDashboard, FileText, Users, Settings, Menu, PlusCircle, BarChart3 } from "lucide-react"
+import { LayoutDashboard, FileText, Users, Settings, Menu, PlusCircle, BarChart3, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navigation = [
@@ -86,17 +87,29 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
       </nav>
 
       <div className="border-t p-4">
-        <div className="flex items-center space-x-3">
-          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-            <span className="text-xs font-medium">A</span>
+        <div className="space-y-3">
+          <div className="flex items-center space-x-3">
+            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+              <span className="text-xs font-medium">A</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium">Admin User</p>
+              <p className="text-xs text-muted-foreground">admin@blog-genny.com</p>
+            </div>
+            <Badge variant="secondary" className="text-xs">
+              Admin
+            </Badge>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">Admin User</p>
-            <p className="text-xs text-muted-foreground">admin@blog-genny.com</p>
-          </div>
-          <Badge variant="secondary" className="text-xs">
-            Admin
-          </Badge>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start text-muted-foreground hover:text-foreground"
+            onClick={() => signOut({ callbackUrl: "/" })}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </div>
     </div>
@@ -129,7 +142,18 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
               <h1 className="text-2xl font-semibold">
                 {navigation.find((item) => item.href === pathname)?.name || "Dashboard"}
               </h1>
-              <ThemeToggle />
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+                <ThemeToggle />
+              </div>
             </div>
           </div>
           <div className="p-6">{children}</div>

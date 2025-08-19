@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { PenTool, Home, Search } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { UserNav } from "@/components/user-nav"
 
 export function Header() {
   return (
@@ -32,6 +33,7 @@ export function Header() {
             </Link>
           </Button>
           <ThemeToggle />
+          <UserNav />
         </div>
       </nav>
     </header>
