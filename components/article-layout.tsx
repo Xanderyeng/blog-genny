@@ -19,19 +19,6 @@ export function ArticleLayout({
   coverImageUrl,
   coverImageAttribution,
 }: ArticleLayoutProps) {
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString)
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    } catch {
-      return dateString // fallback to original string if parsing fails
-    }
-  }
-
   return (
     <article className="glass rounded-lg overflow-hidden max-w-4xl mx-auto">
       {coverImageUrl && (
@@ -57,7 +44,7 @@ export function ArticleLayout({
             <div className="flex items-center gap-4 text-muted-foreground text-sm">
               {author && <span>By {author}</span>}
               {publishedAt && <span>•</span>}
-              {publishedAt && <time>{formatDate(publishedAt)}</time>}
+              {publishedAt && <time>{publishedAt}</time>}
             </div>
             {tags && tags.length > 0 && (
               <div className="flex gap-2 mt-4">

@@ -1,6 +1,7 @@
 "use server";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { findHeroImage } from "@/lib/images";
 import fs from "fs";
 import path from "path";
 
@@ -68,6 +69,30 @@ Your content here...`;
             /date:\s*[\d]{4}-[\d]{2}-[\d]{2}/g,
             `date: "${currentDate}"`
         );
+
+        // Extract title from generated content to find images
+        const titleMatch = generatedContent.match(/title:\s*"([^"]+)"/);
+        const extractedTitle = titleMatch ? titleMatch[1] : topic;
+
+        // Find hero and cover images
+        const heroImageData = await findHeroImage(extractedTitle);
+
+        if (heroImageData) {
+            // Add images to the frontmatter
+            const frontmatterEnd = generatedContent.indexOf('---', 3);
+            if (frontmatterEnd !== -1) {
+                const beforeFrontmatterEnd = generatedContent.substring(0, frontmatterEnd);
+                const afterFrontmatterEnd = generatedContent.substring(frontmatterEnd);
+
+                const imageFields = `coverImageUrl: "${heroImageData.imageUrl}"
+coverImageAttribution: "${heroImageData.attribution}"
+heroImage: "${heroImageData.imageUrl}"
+heroImageAttribution: "${heroImageData.attribution}"
+`;
+
+                generatedContent = beforeFrontmatterEnd + imageFields + afterFrontmatterEnd;
+            }
+        }
 
         // Generate a slug from the topic
         const slug = topic

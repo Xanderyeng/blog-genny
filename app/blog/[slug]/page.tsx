@@ -43,6 +43,25 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                             </Link>
                         </Button>
 
+                        {/* Hero Image */}
+                        {(post.heroImage || post.coverImageUrl) && (
+                            <div className="mb-8">
+                                <img
+                                    src={post.heroImage || post.coverImageUrl}
+                                    alt={`Hero image for ${post.title}`}
+                                    className="w-full h-64 md:h-80 object-cover rounded-lg shadow-lg"
+                                />
+                                {(post.heroImageAttribution || post.coverImageAttribution) && (
+                                    <div
+                                        className="mt-2 text-xs text-muted-foreground"
+                                        dangerouslySetInnerHTML={{
+                                            __html: post.heroImageAttribution || post.coverImageAttribution || ""
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        )}
+
                         <div className="space-y-4">
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-2">

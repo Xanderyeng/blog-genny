@@ -14,6 +14,8 @@ export interface BlogPost {
   content: string
   coverImageUrl?: string
   coverImageAttribution?: string
+  heroImage?: string
+  heroImageAttribution?: string
 }
 
 export async function getAllPosts(): Promise<BlogPost[]> {
@@ -48,6 +50,8 @@ export async function getAllPosts(): Promise<BlogPost[]> {
         content,
         coverImageUrl: data.coverImageUrl,
         coverImageAttribution: data.coverImageAttribution,
+        heroImage: data.heroImage,
+        heroImageAttribution: data.heroImageAttribution,
       }
     })
 
@@ -84,6 +88,8 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
       content,
       coverImageUrl: data.coverImageUrl,
       coverImageAttribution: data.coverImageAttribution,
+      heroImage: data.heroImage,
+      heroImageAttribution: data.heroImageAttribution,
     }
   } catch (error) {
     console.error(`Error reading post ${slug}:`, error)

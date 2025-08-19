@@ -11,6 +11,10 @@ interface BlogPost {
   date: string
   tags: string[]
   readingTime: string
+  coverImageUrl?: string
+  coverImageAttribution?: string
+  heroImage?: string
+  heroImageAttribution?: string
 }
 
 interface BlogCardProps {
@@ -19,7 +23,18 @@ interface BlogCardProps {
 
 export function BlogCard({ post }: BlogCardProps) {
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow">
+    <Card className="h-full hover:shadow-lg transition-shadow pt-0 overflow-hidden">
+      {/* Cover Image */}
+      {post.coverImageUrl && (
+        <div className="w-full !pt-0 !mt-0 overflow-hidden">
+          <img
+            src={post.coverImageUrl}
+            alt={post.title}
+            className="w-full aspect-video object-cover transition-transform hover:scale-105"
+          />
+        </div>
+      )}
+
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <Calendar className="h-4 w-4" />
