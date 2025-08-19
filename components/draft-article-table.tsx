@@ -1,14 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatusBadge } from "@/components/status-badge"
-import { MoreHorizontal, Eye, Edit, Trash2, CheckCircle } from "lucide-react"
-import { getArticles, getArticleStats, publishArticle, archiveArticle, deleteArticle } from "@/lib/articles"
+import { MoreHorizontal, Eye, Edit, Trash2, CheckCircle, Loader2 } from "lucide-react"
+import {
+  useArticles,
+  useArticleStats,
+  usePublishArticle,
+  useArchiveArticle,
+  useDeleteArticle
+} from "@/hooks/useArticles"
 
 interface Article {
   id: string
@@ -25,69 +30,72 @@ interface Article {
   } | null
 }
 
-export function DraftArticleTable() {
-  const [articles, setArticles] = useState<Article[]>([])
-  const [stats, setStats] = useState({ draft: 0, published: 0, archived: 0 })
-  const [loading, setLoading] = useState(true)
+interface ArticleStats {
+  draft: number
+  published: number
+  archived: number
+}
 
-  // Load articles and stats
-  const loadData = async () => {
-    setLoading(true)
-    try {
-      const [articlesResult, statsResult] = await Promise.all([getArticles({ limit: 50 }), getArticleStats()])
+interface DraftArticleTableProps {
+  initialArticles?: Article[]
+  initialStats?: ArticleStats
+}
 
-      setArticles(articlesResult.articles as Article[])
-      setStats(statsResult)
-    } catch (error) {
-      console.error("Error loading data:", error)
-    } finally {
-      setLoading(false)
+export function DraftArticleTable({ initialArticles, initialStats }: DraftArticleTableProps) {
+  // Using TanStack Query hooks
+  const {
+    data: articlesData,
+    isLoading: articlesLoading,
+    error: articlesError
+  } = useArticles(50)
+
+  const {
+    data: statsData,
+    isLoading: statsLoading,
+    error: statsError
+  } = useArticleStats()
+
+  const publishMutation = usePublishArticle()
+  const archiveMutation = useArchiveArticle()
+  const deleteMutation = useDeleteArticle()
+
+  // Use fetched data or fall back to initial data
+  const articles = articlesData?.articles || initialArticles || []
+  const stats = statsData || initialStats || { draft: 0, published: 0, archived: 0 }
+
+  const handleStatusChange = (id: string, newStatus: "published" | "archived") => {
+    if (newStatus === "published") {
+      publishMutation.mutate(id)
+    } else {
+      archiveMutation.mutate(id)
     }
   }
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
-  const handleStatusChange = async (id: string, newStatus: "published" | "archived") => {
-    try {
-      let result
-      if (newStatus === "published") {
-        result = await publishArticle(id)
-      } else {
-        result = await archiveArticle(id)
-      }
-
-      if (result.success) {
-        await loadData() // Reload data
-      } else {
-        console.error("Failed to update article status:", result.error)
-      }
-    } catch (error) {
-      console.error("Error updating article status:", error)
-    }
-  }
-
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm("Are you sure you want to delete this article?")) return
-
-    try {
-      const result = await deleteArticle(id)
-      if (result.success) {
-        await loadData() // Reload data
-      } else {
-        console.error("Failed to delete article:", result.error)
-      }
-    } catch (error) {
-      console.error("Error deleting article:", error)
-    }
+    deleteMutation.mutate(id)
   }
 
-  if (loading) {
-    return <div className="flex items-center justify-center p-8">Loading...</div>
+  const isLoading = articlesLoading || statsLoading
+  const isError = articlesError || statsError
+  const isMutating = publishMutation.isPending || archiveMutation.isPending || deleteMutation.isPending
+
+  if (isLoading && !initialArticles) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading articles...</span>
+      </div>
+    )
   }
 
-  return (
+  if (isError && !initialArticles) {
+    return (
+      <div className="flex items-center justify-center p-8 text-red-500">
+        Error loading articles. Please try again.
+      </div>
+    )
+  } return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -160,7 +168,7 @@ export function DraftArticleTable() {
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" disabled={isMutating}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -174,12 +182,12 @@ export function DraftArticleTable() {
                           Edit
                         </DropdownMenuItem>
                         {article.status === "draft" && (
-                          <DropdownMenuItem onClick={() => handleStatusChange(article.id, "published")}>
+                          <DropdownMenuItem onClick={() => handleStatusChange(article.id, "published")} disabled={isMutating}>
                             <CheckCircle className="mr-2 h-4 w-4" />
                             Publish
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(article.id)}>
+                        <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(article.id)} disabled={isMutating}>
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>

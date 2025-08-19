@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { LayoutDashboard, FileText, Users, Settings, Menu, PlusCircle, BarChart3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -123,11 +124,12 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto">
-          <div className="glass-light border-b">
-            <div className="px-6 py-4">
+          <div className="glass-light border-0">
+            <div className="px-6 py-3.25 flex items-center justify-between">
               <h1 className="text-2xl font-semibold">
                 {navigation.find((item) => item.href === pathname)?.name || "Dashboard"}
               </h1>
+              <ThemeToggle />
             </div>
           </div>
           <div className="p-6">{children}</div>

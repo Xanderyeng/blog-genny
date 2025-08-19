@@ -1,21 +1,22 @@
 import NextAuth from "next-auth"
 import { DrizzleAdapter } from "@auth/drizzle-adapter"
-import Credentials from "next-auth/providers/credentials"
-import Google from "next-auth/providers/google"
+import CredentialsProvider from "next-auth/providers/credentials"
+import GoogleProvider from "next-auth/providers/google"
 import { db } from "@/lib/db"
 import { users, accounts, sessions, verificationTokens } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 import bcrypt from "bcryptjs"
+import type { NextAuthOptions } from "next-auth"
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db) as any,
   providers: [
-    Credentials({
+    CredentialsProvider({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
@@ -45,7 +46,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       },
     }),
-    Google({
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
@@ -73,4 +74,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/auth/signin",
   },
-})
+}
+
+export default NextAuth(authOptions)
+
+// Export for server-side usage
+export const getServerSession = (req: any, res: any) => {
+  return NextAuth(authOptions).getServerSession(req, res)
+}

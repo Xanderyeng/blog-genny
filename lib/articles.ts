@@ -56,7 +56,7 @@ export async function createArticle(data: CreateArticleData) {
         id,
         title: data.title,
         slug,
-        content: data.content,
+        content: data.content, // Store MDX content directly
         description: data.description,
         status: data.status || "draft",
         authorId: data.authorId,

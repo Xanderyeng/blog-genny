@@ -74,7 +74,7 @@ export const articles = pgTable("articles", {
     id: text("id").primaryKey().notNull(),
     title: text("title").notNull(),
     slug: text("slug").notNull().unique(),
-    content: text("content").notNull(),
+    content: text("content").notNull(), // MDX content
     description: text("description").notNull(),
     status: articleStatusEnum("status").default("draft").notNull(),
     authorId: text("authorId")

@@ -6,10 +6,12 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
+import { AuthCard } from "./auth-card"
+import { FormField } from "./form-field"
+import { PasswordInput } from "./password-input"
+import { AuthDivider } from "./auth-divider"
+import { OAuthProviders } from "./oauth-providers"
 
 export function SignUpForm() {
   const [name, setName] = useState("")
@@ -58,75 +60,65 @@ export function SignUpForm() {
   }
 
   return (
-    <Card className="w-full max-w-md glass-light">
-      <CardHeader>
-        <CardTitle>Sign Up</CardTitle>
-        <CardDescription>Create a new account to get started</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+    <AuthCard
+      title="Sign Up"
+      description="Create a new account to get started"
+      error={error}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <FormField label="Name" htmlFor="name">
+          <Input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            disabled={loading}
+          />
+        </FormField>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
+        <FormField label="Email" htmlFor="email">
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={loading}
+          />
+        </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
+        <FormField label="Password" htmlFor="password">
+          <PasswordInput
+            id="password"
+            value={password}
+            onChange={setPassword}
+            required
+            disabled={loading}
+            minLength={6}
+          />
+        </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={loading}
-              minLength={6}
-            />
-          </div>
+        <FormField label="Confirm Password" htmlFor="confirmPassword">
+          <PasswordInput
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            required
+            disabled={loading}
+            minLength={6}
+          />
+        </FormField>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              disabled={loading}
-              minLength={6}
-            />
-          </div>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Sign Up
+        </Button>
+      </form>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign Up
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+      <AuthDivider />
+
+      <OAuthProviders disabled={loading} />
+    </AuthCard>
   )
 }

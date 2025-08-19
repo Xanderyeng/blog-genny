@@ -188,4 +188,46 @@ body {
     -webkit-backdrop-filter: blur(16px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+  .prose-custom {
+    @apply text-foreground;
+  }
+
+  .prose-custom h1,
+  .prose-custom h2,
+  .prose-custom h3,
+  .prose-custom h4,
+  .prose-custom h5,
+  .prose-custom h6 {
+    @apply text-foreground font-semibold;
+  }
+
+  .prose-custom p {
+    @apply text-foreground leading-relaxed mb-4;
+  }
+
+  .prose-custom code {
+    @apply bg-muted text-foreground px-1 py-0.5 rounded text-sm;
+  }
+
+  .prose-custom pre {
+    @apply bg-muted border rounded-lg p-4 overflow-x-auto;
+  }
+
+  .prose-custom pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .prose-custom blockquote {
+    @apply border-l-4 border-primary pl-4 italic text-muted-foreground;
+  }
+
+  .prose-custom ul,
+  .prose-custom ol {
+    @apply mb-4 space-y-2;
+  }
+
+  .prose-custom li {
+    @apply text-foreground;
+  }
 }

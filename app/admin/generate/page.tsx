@@ -1,5 +1,5 @@
 import { AdminDashboardLayout } from "@/components/admin-dashboard-layout"
-import { GenerateForm } from "@/components/generate-form"
+import { GenerateForm } from '@/components/generate-article-form'
 
 export default function AdminGenerate() {
   return (

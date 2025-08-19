@@ -4,7 +4,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findHeroImage } from "@/lib/images";
 import { createArticle } from "@/lib/articles";
 import { nanoid } from "nanoid";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 interface GenerateBlogResult {
     success: boolean;
@@ -16,7 +17,7 @@ interface GenerateBlogResult {
 export async function generateBlog(topic: string): Promise<GenerateBlogResult> {
     try {
         // Check if user is authenticated
-        const session = await auth();
+        const session = await getServerSession(authOptions);
         if (!session?.user?.id) {
             return {
                 success: false,

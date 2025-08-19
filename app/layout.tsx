@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Roboto_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { QueryProviders } from "@/components/providers/query-providers"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${roboto_mono.variable}`}>
       <ThemeProvider defaultTheme="system" storageKey="blog-genny-theme">
-      <body>{children}</body>
+        <QueryProviders>
+          <body>{children}</body>
+        </QueryProviders>
       </ThemeProvider>
     </html>
   )

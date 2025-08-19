@@ -3,8 +3,18 @@ import { DraftArticleTable } from "@/components/draft-article-table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Users, TrendingUp, Clock } from "lucide-react"
+import { getArticlesAction, getArticleStatsAction } from "@/app/actions/articleActions"
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  // Fetch data on the server side
+  const [articlesResult, statsResult] = await Promise.all([
+    getArticlesAction({ limit: 50 }),
+    getArticleStatsAction()
+  ])
+
+  const articles = articlesResult.success && articlesResult.data ? articlesResult.data.articles : []
+  const stats = statsResult.success && statsResult.data ? statsResult.data : { draft: 0, published: 0, archived: 0 }
+
   return (
     <AdminDashboardLayout>
       <div className="space-y-6">
@@ -18,45 +28,45 @@ export default function AdminDashboard() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card className="glass-light">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+              <CardTitle className="text-sm font-medium">Draft Articles</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground">+2 from yesterday</p>
+              <div className="text-2xl font-bold">{stats.draft}</div>
+              <p className="text-xs text-muted-foreground">Articles pending review</p>
             </CardContent>
           </Card>
 
           <Card className="glass-light">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Published Today</CardTitle>
+              <CardTitle className="text-sm font-medium">Published Articles</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1</div>
-              <p className="text-xs text-muted-foreground">+1 from yesterday</p>
+              <div className="text-2xl font-bold">{stats.published}</div>
+              <p className="text-xs text-muted-foreground">Live on the blog</p>
             </CardContent>
           </Card>
 
           <Card className="glass-light">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <CardTitle className="text-sm font-medium">Archived Articles</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,234</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
+              <div className="text-2xl font-bold">{stats.archived}</div>
+              <p className="text-xs text-muted-foreground">No longer active</p>
             </CardContent>
           </Card>
 
           <Card className="glass-light">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Read Time</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">4.2m</div>
-              <p className="text-xs text-muted-foreground">+0.3m from last week</p>
+              <div className="text-2xl font-bold">{stats.draft + stats.published + stats.archived}</div>
+              <p className="text-xs text-muted-foreground">All articles created</p>
             </CardContent>
           </Card>
         </div>
@@ -113,7 +123,7 @@ export default function AdminDashboard() {
                   className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors"
                 >
                   <span className="font-medium">Review Drafts</span>
-                  <Badge variant="secondary">3</Badge>
+                  <Badge variant="secondary">{stats.draft}</Badge>
                 </a>
                 <a
                   href="/admin/users"
@@ -128,7 +138,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Articles Overview */}
-        <DraftArticleTable />
+        <DraftArticleTable initialArticles={articles} initialStats={stats} />
       </div>
     </AdminDashboardLayout>
   )
