@@ -1,10 +1,35 @@
-import { getAllPosts } from "@/lib/mdx"
+import { getArticles } from "@/lib/articles"
 import { BlogCard } from "@/components/blog-card"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 
+// Helper function to calculate reading time
+function calculateReadingTime(content: string): string {
+  const wordsPerMinute = 200
+  const words = content.split(/\s+/).length
+  const minutes = Math.ceil(words / wordsPerMinute)
+  return `${minutes} min read`
+}
+
 export default async function HomePage() {
-  const posts = await getAllPosts()
+  const { articles } = await getArticles({
+    status: 'published',
+    limit: 20
+  })
+
+  // Transform database articles to BlogPost format
+  const posts = articles.map(article => ({
+    slug: article.slug,
+    title: article.title,
+    description: article.description || article.metaDescription || '',
+    date: article.publishedAt?.toISOString() || article.createdAt.toISOString(),
+    tags: [], // We'll implement tags later
+    readingTime: calculateReadingTime(article.content || ''),
+    coverImageUrl: article.coverImageUrl || undefined,
+    coverImageAttribution: article.coverImageAttribution || undefined,
+    heroImage: article.coverImageUrl || undefined,
+    heroImageAttribution: article.coverImageAttribution || undefined,
+  }))
 
   return (
     <>

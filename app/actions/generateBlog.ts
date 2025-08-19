@@ -2,17 +2,28 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findHeroImage } from "@/lib/images";
-import fs from "fs";
-import path from "path";
+import { createArticle } from "@/lib/articles";
+import { nanoid } from "nanoid";
+import { auth } from "@/lib/auth";
 
 interface GenerateBlogResult {
     success: boolean;
+    articleId?: string;
     slug?: string;
     error?: string;
 }
 
 export async function generateBlog(topic: string): Promise<GenerateBlogResult> {
     try {
+        // Check if user is authenticated
+        const session = await auth();
+        if (!session?.user?.id) {
+            return {
+                success: false,
+                error: "You must be logged in to generate blog posts."
+            };
+        }
+
         if (!process.env.GEMINI_API_KEY) {
             return {
                 success: false,
@@ -29,98 +40,79 @@ export async function generateBlog(topic: string): Promise<GenerateBlogResult> {
         const prompt = `Write a detailed, SEO-friendly blog post about: ${topic}.
 
 Requirements:
-- Start with frontmatter (title, description, date, tags)
+- Write ONLY the main content, no frontmatter
 - Use clear headings with ## and ###
 - Include bullet points and useful examples
 - Length: 600-800 words
 - Make it engaging and informative
-- Include relevant tags (3-5 tags)
+- Write a compelling title
+- Include a brief description (2-3 sentences)
 
-Format the response as valid MDX with frontmatter like this:
----
-title: "Your Blog Post Title"
-description: "Brief description of the post"
-date: "CURRENT_DATE_PLACEHOLDER"
-tags: ["tag1", "tag2", "tag3"]
----
+Format your response as JSON with this structure:
+{
+  "title": "Your compelling blog post title",
+  "description": "Brief 2-3 sentence description of the post",
+  "content": "The full blog post content in markdown format",
+  "tags": ["tag1", "tag2", "tag3"]
+}
 
-# Your Blog Post Title
-
-Your content here...`;
+Make sure the JSON is valid and properly escaped.`;
 
         const result = await model.generateContent(prompt);
-        let generatedContent = result.response.text();
+        let generatedResponse = result.response.text();
 
-        // Replace the placeholder with the actual current date
-        generatedContent = generatedContent.replace(
-            '"CURRENT_DATE_PLACEHOLDER"',
-            `"${currentDate}"`
-        );
+        // Clean up the response to ensure it's valid JSON
+        generatedResponse = generatedResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
 
-        // Also handle cases where AI might generate a different date format
-        // Replace any date in YYYY-MM-DD format with our current date
-        generatedContent = generatedContent.replace(
-            /date:\s*"[\d]{4}-[\d]{2}-[\d]{2}"/g,
-            `date: "${currentDate}"`
-        );
-
-        // Also handle dates without quotes
-        generatedContent = generatedContent.replace(
-            /date:\s*[\d]{4}-[\d]{2}-[\d]{2}/g,
-            `date: "${currentDate}"`
-        );
-
-        // Extract title from generated content to find images
-        const titleMatch = generatedContent.match(/title:\s*"([^"]+)"/);
-        const extractedTitle = titleMatch ? titleMatch[1] : topic;
-
-        // Find hero and cover images
-        const heroImageData = await findHeroImage(extractedTitle);
-
-        if (heroImageData) {
-            // Add images to the frontmatter
-            const frontmatterEnd = generatedContent.indexOf('---', 3);
-            if (frontmatterEnd !== -1) {
-                const beforeFrontmatterEnd = generatedContent.substring(0, frontmatterEnd);
-                const afterFrontmatterEnd = generatedContent.substring(frontmatterEnd);
-
-                const imageFields = `coverImageUrl: "${heroImageData.imageUrl}"
-coverImageAttribution: "${heroImageData.attribution}"
-heroImage: "${heroImageData.imageUrl}"
-heroImageAttribution: "${heroImageData.attribution}"
-`;
-
-                generatedContent = beforeFrontmatterEnd + imageFields + afterFrontmatterEnd;
-            }
+        // Parse the JSON response
+        let articleData;
+        try {
+            articleData = JSON.parse(generatedResponse);
+        } catch (parseError) {
+            console.error("Failed to parse AI response as JSON:", parseError);
+            console.error("Raw response:", generatedResponse);
+            return {
+                success: false,
+                error: "Failed to parse AI response. Please try again."
+            };
         }
 
-        // Generate a slug from the topic
-        const slug = topic
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim()
-            .substring(0, 50)
-            .replace(/-$/, '');
-
-        // Add timestamp to make slug unique
-        const timestamp = Date.now();
-        const uniqueSlug = `${slug}-${timestamp}`;
-
-        // Ensure content directory exists
-        const contentDir = path.join(process.cwd(), "content", "blog");
-        if (!fs.existsSync(contentDir)) {
-            fs.mkdirSync(contentDir, { recursive: true });
+        // Validate required fields
+        if (!articleData.title || !articleData.content || !articleData.description) {
+            return {
+                success: false,
+                error: "AI response missing required fields (title, content, or description)."
+            };
         }
 
-        // Save the generated content as an MDX file
-        const filePath = path.join(contentDir, `${uniqueSlug}.mdx`);
-        fs.writeFileSync(filePath, generatedContent, "utf8");
+        // Find hero image for the article
+        const heroImageData = await findHeroImage(articleData.title);
+
+        // Create the article in the database
+        const articleResult = await createArticle({
+            title: articleData.title,
+            content: articleData.content,
+            description: articleData.description,
+            authorId: session.user.id,
+            coverImageUrl: heroImageData?.imageUrl,
+            coverImageAttribution: heroImageData?.attribution,
+            metaTitle: articleData.title,
+            metaDescription: articleData.description,
+            status: "draft", // Always create as draft for review
+            // Note: We'll handle tags later when we implement the topics system
+        });
+
+        if (!articleResult.success) {
+            return {
+                success: false,
+                error: articleResult.error || "Failed to save article to database."
+            };
+        }
 
         return {
             success: true,
-            slug: uniqueSlug
+            articleId: articleResult.article?.id,
+            slug: articleResult.article?.slug
         };
     } catch (error) {
         console.error("Error generating blog:", error);
