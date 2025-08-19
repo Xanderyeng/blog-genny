@@ -329,6 +329,13 @@ export async function publishArticle(id: string) {
   })
 }
 
+// Unpublish an article (change status from published back to draft)
+export async function unpublishArticle(id: string) {
+  return updateArticle(id, {
+    status: "draft",
+  })
+}
+
 // Archive an article
 export async function archiveArticle(id: string) {
   return updateArticle(id, {

@@ -64,6 +64,48 @@ export function UserDashboard({ user }: UserDashboardProps) {
         </div>
       </div>
 
+      {/* Premium Features Highlight - Premium Users Only */}
+      {isPremium && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg p-6 mb-6 border border-purple-200 dark:border-purple-800">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <Crown className="h-5 w-5 text-purple-600" />
+              <h3 className="text-lg font-semibold">Premium Features Available</h3>
+            </div>
+            <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+              <Zap className="h-3 w-3 mr-1" />
+              Active
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Button asChild variant="outline" size="sm" className="justify-start">
+              <Link href="/dashboard/settings?tab=profile">
+                <User className="h-4 w-4 mr-2" />
+                Profile Settings
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="justify-start">
+              <Link href="/dashboard/settings?tab=billing">
+                <Calendar className="h-4 w-4 mr-2" />
+                Billing & Invoices
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="justify-start">
+              <Link href="/dashboard/settings?tab=notifications">
+                <Settings className="h-4 w-4 mr-2" />
+                Email Notifications
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm" className="justify-start">
+              <Link href="/dashboard/analytics">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Advanced Analytics
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {/* Generate Article */}
@@ -161,15 +203,19 @@ export function UserDashboard({ user }: UserDashboardProps) {
             <CardTitle className="flex items-center space-x-2 text-lg">
               <User className="h-5 w-5 text-gray-600" />
               <span>Profile & Settings</span>
+              {isPremium && <Zap className="h-4 w-4 text-yellow-500" />}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Update your profile and account preferences.
+              {isPremium 
+                ? "Access premium profile settings, billing, and advanced preferences."
+                : "Update your profile and account preferences."
+              }
             </p>
             <Button asChild variant="outline" className="w-full">
               <Link href="/dashboard/settings">
-                Manage Account
+                {isPremium ? "Premium Settings" : "Manage Account"}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>

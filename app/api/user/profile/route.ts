@@ -13,11 +13,24 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { name } = await request.json()
+    const { 
+      name, 
+      bio, 
+      location, 
+      website, 
+      twitter, 
+      linkedin, 
+      github, 
+      instagram 
+    } = await request.json()
 
     if (!name || typeof name !== "string") {
       return NextResponse.json({ error: "Invalid name" }, { status: 400 })
     }
+
+    // In a real app, you might want to store extended profile data in a separate table
+    // For now, we'll just update the name field and log the other data
+    // You could extend the users table schema or create a profiles table
 
     // Update user profile
     await db
@@ -27,6 +40,18 @@ export async function PATCH(request: NextRequest) {
         updatedAt: new Date()
       })
       .where(eq(users.email, session.user.email))
+
+    // TODO: Store extended profile data in a profiles table
+    // await db.update(profiles).set({
+    //   bio,
+    //   location,
+    //   website,
+    //   twitter,
+    //   linkedin,
+    //   github,
+    //   instagram,
+    //   updatedAt: new Date()
+    // }).where(eq(profiles.userId, userId))
 
     return NextResponse.json({ success: true })
   } catch (error) {

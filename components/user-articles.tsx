@@ -13,16 +13,40 @@ import {
   Plus,
   Calendar,
   User,
-  BarChart3
+  BarChart3,
+  EyeOff,
+  CheckCircle,
+  Archive,
+  MoreHorizontal
 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import Link from "next/link"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 type Article = {
   id: string
   title: string
   slug: string
-  excerpt: string | null
+  description: string
   status: "draft" | "published" | "archived"
   createdAt: Date
   updatedAt: Date
@@ -45,10 +69,54 @@ interface UserArticlesProps {
 export function UserArticles({ articles, user }: UserArticlesProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "published" | "archived">("all")
+  const [isLoading, setIsLoading] = useState<string | null>(null)
+  const router = useRouter()
+
+  const handleStatusChange = async (articleId: string, action: "publish" | "unpublish" | "archive") => {
+    setIsLoading(articleId)
+    try {
+      const response = await fetch(`/api/articles/${articleId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      })
+
+      if (response.ok) {
+        toast.success(`Article ${action}ed successfully!`)
+        router.refresh()
+      } else {
+        toast.error(`Failed to ${action} article`)
+      }
+    } catch (error) {
+      toast.error("An error occurred")
+    } finally {
+      setIsLoading(null)
+    }
+  }
+
+  const handleDeleteArticle = async (articleId: string) => {
+    setIsLoading(articleId)
+    try {
+      const response = await fetch(`/api/articles/${articleId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        toast.success("Article deleted successfully!")
+        router.refresh()
+      } else {
+        toast.error("Failed to delete article")
+      }
+    } catch (error) {
+      toast.error("An error occurred")
+    } finally {
+      setIsLoading(null)
+    }
+  }
 
   const filteredArticles = articles.filter(article => {
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         (article.excerpt && article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()))
+                         (article.description && article.description.toLowerCase().includes(searchQuery.toLowerCase()))
     const matchesStatus = statusFilter === "all" || article.status === statusFilter
     
     return matchesSearch && matchesStatus
@@ -209,9 +277,9 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                       </Badge>
                     </div>
                     
-                    {article.excerpt && (
+                    {article.description && (
                       <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                        {article.excerpt}
+                        {article.description}
                       </p>
                     )}
                     
@@ -232,23 +300,117 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                   </div>
                   
                   <div className="flex items-center space-x-2">
+                    {/* Quick Action Buttons */}
                     {article.status === "published" && (
-                      <Button asChild variant="outline" size="sm">
+                      <Button asChild variant="outline" size="sm" title="View Published Article">
                         <Link href={`/blog/${article.slug}`} target="_blank">
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
                     )}
                     
-                    <Button asChild variant="outline" size="sm">
+                    <Button asChild variant="outline" size="sm" title="Edit Article">
                       <Link href={`/dashboard/articles/${article.id}/edit`}>
                         <Edit className="h-4 w-4" />
                       </Link>
                     </Button>
                     
-                    <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {/* Actions Dropdown */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          disabled={isLoading === article.id}
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        {/* Status Change Actions */}
+                        {article.status === "draft" && (
+                          <DropdownMenuItem 
+                            onClick={() => handleStatusChange(article.id, "publish")}
+                            className="text-green-600"
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Publish Article
+                          </DropdownMenuItem>
+                        )}
+                        
+                        {article.status === "published" && (
+                          <DropdownMenuItem 
+                            onClick={() => handleStatusChange(article.id, "unpublish")}
+                            className="text-orange-600"
+                          >
+                            <EyeOff className="mr-2 h-4 w-4" />
+                            Unpublish (Move to Draft)
+                          </DropdownMenuItem>
+                        )}
+                        
+                        {(article.status === "draft" || article.status === "published") && (
+                          <DropdownMenuItem 
+                            onClick={() => handleStatusChange(article.id, "archive")}
+                            className="text-gray-600"
+                          >
+                            <Archive className="mr-2 h-4 w-4" />
+                            Archive Article
+                          </DropdownMenuItem>
+                        )}
+                        
+                        <DropdownMenuSeparator />
+                        
+                        {/* Edit Actions */}
+                        <DropdownMenuItem asChild>
+                          <Link href={`/dashboard/articles/${article.id}/edit`}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Content
+                          </Link>
+                        </DropdownMenuItem>
+                        
+                        {article.status === "published" && (
+                          <DropdownMenuItem asChild>
+                            <Link href={`/blog/${article.slug}`} target="_blank">
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Live Article
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
+                        
+                        <DropdownMenuSeparator />
+                        
+                        {/* Delete Action */}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem 
+                              onSelect={(e) => e.preventDefault()}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Article
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the article "{article.title}" and remove all associated data.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteArticle(article.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                                disabled={isLoading === article.id}
+                              >
+                                {isLoading === article.id ? "Deleting..." : "Delete Article"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </CardContent>

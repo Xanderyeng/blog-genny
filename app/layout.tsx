@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { QueryProviders } from "@/components/providers/query-providers"
 import { AuthProvider } from "@/components/providers/auth-provider"
+import { Toaster } from "sonner"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
           <ThemeProvider defaultTheme="system" storageKey="blog-genny-theme">
             <QueryProviders>
               {children}
+              <Toaster position="top-right" />
             </QueryProviders>
           </ThemeProvider>
         </AuthProvider>

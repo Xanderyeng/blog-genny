@@ -41,12 +41,27 @@ async function seedDatabase() {
     try {
         console.log("🌱 Starting database seeding...\n");
 
-        // 1. Insert admin user and topics using raw SQL
-        console.log("📊 Inserting admin user and topics...");
+        // 1. Insert admin user, premium test user, and topics using raw SQL
+        console.log("📊 Inserting users and topics...");
 
+        // Insert admin user
         await client`
       INSERT INTO users (id, name, email, role, tier, "createdAt", "updatedAt")
       VALUES ('admin-001', 'Blog Admin', 'admin@blog-genny.com', 'admin', 'premium', now(), now())
+      ON CONFLICT (email) DO NOTHING
+    `;
+
+        // Insert premium test user
+        await client`
+      INSERT INTO users (id, name, email, role, tier, "createdAt", "updatedAt")
+      VALUES ('premium-test-001', 'Premium Test User', 'premium@test.com', 'user', 'premium', now(), now())
+      ON CONFLICT (email) DO NOTHING
+    `;
+
+        // Insert free test user
+        await client`
+      INSERT INTO users (id, name, email, role, tier, "createdAt", "updatedAt")
+      VALUES ('free-test-001', 'Free Test User', 'free@test.com', 'user', 'free', now(), now())
       ON CONFLICT (email) DO NOTHING
     `;
 
@@ -111,9 +126,15 @@ async function seedDatabase() {
         const topicCount = await client`SELECT COUNT(*) FROM topics`;
 
         console.log("\n📊 Summary:");
-        console.log(`   👥 Users: 1 (admin)`);
+        console.log(`   👥 Users: 3 (1 admin, 1 premium, 1 free)`);
         console.log(`   📝 Articles: ${articleCount[0].count}`);
         console.log(`   🏷️  Topics: ${topicCount[0].count}`);
+
+        console.log("\n🔑 Test User Credentials:");
+        console.log("   Premium User: premium@test.com");
+        console.log("   Free User: free@test.com");
+        console.log("   Admin User: admin@blog-genny.com");
+        console.log("   Note: These users don't have passwords set - use OAuth or add passwords manually");
 
     } catch (error) {
         console.error("❌ Seeding failed:", error);

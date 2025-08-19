@@ -48,7 +48,7 @@ export function UpgradePlans() {
             <div className="text-3xl font-bold">$0</div>
             <p className="text-muted-foreground">Perfect for getting started</p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 justify-between">
             <ul className="space-y-3">
               {features.free.map((feature, index) => (
                 <li key={index} className="flex items-center space-x-2">

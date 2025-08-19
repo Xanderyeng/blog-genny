@@ -12,7 +12,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { User, Settings, LogOut, Shield } from "lucide-react"
+import { 
+  User, 
+  Settings, 
+  LogOut, 
+  Shield, 
+  FileText, 
+  BarChart3,
+  Crown 
+} from "lucide-react"
 import Link from "next/link"
 
 export function UserNav() {
@@ -63,17 +71,33 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/profile">
+          <Link href="/dashboard/settings">
             <User className="mr-2 h-4 w-4" />
-            Profile
+            Profile & Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings">
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
+          <Link href="/dashboard/articles">
+            <FileText className="mr-2 h-4 w-4" />
+            My Articles
           </Link>
         </DropdownMenuItem>
+        {(session.user.tier === "premium" || session.user.role === "admin") && (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/analytics">
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Analytics
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {session.user.tier === "premium" && (
+          <DropdownMenuItem asChild>
+            <Link href="/dashboard/settings?tab=billing">
+              <Crown className="mr-2 h-4 w-4" />
+              Billing & Subscription
+            </Link>
+          </DropdownMenuItem>
+        )}
         {session.user.role === "admin" && (
           <DropdownMenuItem asChild>
             <Link href="/admin">

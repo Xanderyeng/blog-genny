@@ -65,6 +65,19 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
         </Link>
       </div>
 
+      {/* Sign Out Button - Right after title */}
+      <div className="border-b px-4 py-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent"
+          onClick={() => signOut({ callbackUrl: "/" })}
+        >
+          <LogOut className="h-4 w-4 mr-3" />
+          Sign Out
+        </Button>
+      </div>
+
       <nav className="flex-1 space-y-1 px-4 py-6">
         {navigation.map((item) => {
           const isActive = pathname === item.href
@@ -87,29 +100,17 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
       </nav>
 
       <div className="border-t p-4">
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-              <span className="text-xs font-medium">A</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-muted-foreground">admin@blog-genny.com</p>
-            </div>
-            <Badge variant="secondary" className="text-xs">
-              Admin
-            </Badge>
+        <div className="flex items-center space-x-3">
+          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+            <span className="text-xs font-medium">A</span>
           </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start text-muted-foreground hover:text-foreground"
-            onClick={() => signOut({ callbackUrl: "/" })}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">Admin User</p>
+            <p className="text-xs text-muted-foreground">admin@blog-genny.com</p>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            Admin
+          </Badge>
         </div>
       </div>
     </div>
@@ -125,7 +126,7 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="lg:hidden fixed top-4 left-4 z-50">
+          <Button variant="ghost" size="icon" className="lg:hidden fixed top-4 left-4 z-40 glass bg-background/20 rounded-xl">
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
@@ -135,25 +136,20 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Floating Theme Toggle */}
+        <div className="fixed top-6 right-6 z-50">
+          <div className="glass bg-background/20 rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl">
+            <ThemeToggle />
+          </div>
+        </div>
+
         <main className="flex-1 overflow-y-auto">
           <div className="glass-light border-0">
-            <div className="px-6 py-3.25 flex items-center justify-between">
+            <div className="px-6 py-3.25">
               <h1 className="text-2xl font-semibold">
                 {navigation.find((item) => item.href === pathname)?.name || "Dashboard"}
               </h1>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-foreground"
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Button>
-                <ThemeToggle />
-              </div>
             </div>
           </div>
           <div className="p-6">{children}</div>

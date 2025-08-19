@@ -1,0 +1,58 @@
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { users, articles } from "@/lib/schema"
+import { eq, and } from "drizzle-orm"
+import { redirect, notFound } from "next/navigation"
+import { ArticleEditForm } from "@/components/article-edit-form"
+
+export default async function EditArticlePage({
+  params,
+}: {
+  params: { id: string }
+}) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session?.user?.email) {
+    redirect("/auth/signin")
+  }
+
+  const user = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.user.email))
+    .limit(1)
+  
+  if (!user[0]) {
+    redirect("/auth/signin")
+  }
+
+  // Get the article and verify ownership
+  const article = await db
+    .select()
+    .from(articles)
+    .where(
+      and(
+        eq(articles.id, params.id),
+        eq(articles.authorId, user[0].id)
+      )
+    )
+    .limit(1)
+  
+  if (!article[0]) {
+    notFound()
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Edit Article</h1>
+        <p className="text-muted-foreground">
+          Make changes to your article and save when ready.
+        </p>
+      </div>
+      
+      <ArticleEditForm article={article[0]} />
+    </div>
+  )
+}

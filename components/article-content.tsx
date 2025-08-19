@@ -8,6 +8,78 @@ interface ArticleContentProps {
     content: string
 }
 
+// Sanitize MDX content to prevent parsing errors
+function sanitizeMDXContent(content: string): string {
+    if (!content) return ""
+    
+    let sanitized = content
+        // Ensure proper line endings
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+    
+    // Fix malformed code blocks - find incomplete code blocks and complete them
+    // Look for code block starts without proper endings
+    sanitized = sanitized.replace(/```(\w+)?\s*\n([\s\S]*?)(?!```)/g, (match, lang, code) => {
+        // If the code block doesn't end with ```, add it
+        if (!code.trim().endsWith('```')) {
+            const cleanLang = lang || ""
+            const cleanCode = code.trim()
+            return `\`\`\`${cleanLang}\n${cleanCode}\n\`\`\``
+        }
+        return match
+    })
+    
+    // Handle cases where code blocks are started but never closed at the end of content
+    const codeBlockRegex = /```(\w+)?\s*\n([\s\S]+?)$/
+    if (codeBlockRegex.test(sanitized) && !sanitized.trim().endsWith('```')) {
+        const match = sanitized.match(codeBlockRegex)
+        if (match) {
+            const lang = match[1] || ""
+            const code = match[2].trim()
+            sanitized = sanitized.replace(codeBlockRegex, `\`\`\`${lang}\n${code}\n\`\`\``)
+        }
+    }
+    
+    // More aggressive brace handling - escape ALL standalone braces that aren't in code blocks
+    const lines = sanitized.split('\n')
+    let isInCodeBlock = false
+    const processedLines = lines.map((line) => {
+        // Check if this line starts or ends a code block
+        if (line.trim().startsWith('```')) {
+            isInCodeBlock = !isInCodeBlock
+            return line
+        }
+        
+        if (isInCodeBlock) {
+            return line // Don't modify lines inside code blocks
+        }
+        
+        // For lines outside code blocks, aggressively escape all braces
+        return line
+            // Escape standalone opening braces
+            .replace(/\{/g, "\\{")
+            // Escape standalone closing braces  
+            .replace(/\}/g, "\\}")
+            // Escape dollar signs followed by braces
+            .replace(/\$\\?\{/g, "\\${")
+            // Escape any other problematic characters
+            .replace(/`(?!`)/g, "\\`") // Escape single backticks that aren't part of code blocks
+    })
+    
+    sanitized = processedLines.join('\n')
+    
+    // Additional cleanup for common MDX issues
+    sanitized = sanitized
+        // Ensure proper spacing around headings
+        .replace(/^(#{1,6})\s*(.+)$/gm, '$1 $2')
+        // Fix any remaining template literal issues
+        .replace(/\$\{([^}]*)\}/g, '\\${$1\\}')
+        // Clean up any double escaping
+        .replace(/\\\\(\{|\})/g, '\\$1')
+    
+    return sanitized.trim()
+}
+
 function ArticleContentSkeleton() {
     return (
         <article className="prose prose-lg max-w-none">
@@ -144,14 +216,51 @@ const mdxComponents = {
 }
 
 async function ArticleContent({ content }: ArticleContentProps) {
-    return (
-        <article className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground">
-            <MDXRemote
-                source={content}
-                components={mdxComponents}
-            />
-        </article>
-    )
+    const sanitizedContent = sanitizeMDXContent(content)
+    
+    try {
+        return (
+            <article className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground">
+                <MDXRemote
+                    source={sanitizedContent}
+                    components={mdxComponents}
+                />
+            </article>
+        )
+    } catch (error) {
+        console.error("MDX parsing error:", error)
+        console.error("Original content preview:", content.substring(0, 500))
+        console.error("Sanitized content preview:", sanitizedContent.substring(0, 500))
+        
+        // Log specific error details
+        if (error instanceof Error) {
+            console.error("Error message:", error.message)
+            console.error("Error stack:", error.stack)
+        }
+        
+        return (
+            <article className="prose prose-lg max-w-none">
+                <div className="p-4 border border-destructive/20 bg-destructive/10 rounded-lg">
+                    <h3 className="text-destructive font-semibold mb-2">Content Parsing Error</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                        There was an issue parsing the article content. Please try refreshing the page or contact support if the issue persists.
+                    </p>
+                    <details className="text-xs">
+                        <summary className="cursor-pointer font-medium mb-2">Show Technical Details</summary>
+                        <div className="space-y-2">
+                            <p><strong>Error:</strong> {error instanceof Error ? error.message : 'Unknown error'}</p>
+                            <div>
+                                <strong>Sanitized Content Preview:</strong>
+                                <pre className="whitespace-pre-wrap text-xs bg-muted p-2 rounded border overflow-auto max-h-40 mt-1">
+                                    {sanitizedContent.substring(0, 1000)}{sanitizedContent.length > 1000 ? '...' : ''}
+                                </pre>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </article>
+        )
+    }
 }
 
 export function ArticleContentSection({ content }: ArticleContentProps) {
