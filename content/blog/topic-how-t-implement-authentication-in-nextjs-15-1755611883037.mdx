@@ -1,0 +1,164 @@
+---
+title: "Implementing Authentication and Role-Based Access Control in Next.js 15 with PostgreSQL"
+description: "A comprehensive guide to building secure authentication and role-based access control (RBAC) in your Next.js 15 application using PostgreSQL. Learn step-by-step with code examples."
+date: "2025-08-19T15:31:23.037Z"
+tags: ["Next.js", "PostgreSQL", "Authentication", "RBAC", "Authorization"]
+---
+
+# Implementing Authentication and Role-Based Access Control in Next.js 15 with PostgreSQL
+
+This guide provides a comprehensive walkthrough of implementing secure authentication and role-based access control (RBAC) in your Next.js 15 application using PostgreSQL.  We'll cover setting up the database, creating user accounts, handling authentication with JWTs, and finally enforcing RBAC to restrict access based on user roles.
+
+
+## 1. Setting up PostgreSQL and the Database Schema
+
+First, ensure you have PostgreSQL installed and running.  We'll create a simple schema with users and roles.
+
+```sql
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(255) NOT NULL DEFAULT 'user' -- Default role is 'user'
+);
+
+-- Sample data (replace with your own secure password hashing)
+INSERT INTO users (username, password, role) VALUES ('admin', '$2b$10$w.g.h2v869U.c2fU.x757u.g6J0s8Y6i7d/9g6z4m82L8L.b8o0G.C', 'admin'), ('user', '$2b$10$w.g.h2v869U.c2fU.x757u.g6J0s8Y6i7d/9g6z4m82L8L.b8o0G.C', 'user');
+```
+
+Remember to replace the placeholder passwords with securely hashed passwords using a library like `bcrypt`.
+
+
+## 2. Setting up the Next.js Application and Dependencies
+
+Create a new Next.js application:
+
+```bash
+npx create-next-app my-next-app
+cd my-next-app
+```
+
+Install necessary packages:
+
+```bash
+npm install pg @prisma/client next-auth jwt-decode
+```
+
+* `pg`:  PostgreSQL client for Node.js.
+* `@prisma/client`:  An ORM (Object-Relational Mapper) for easier database interaction (optional but recommended).
+* `next-auth`: Simplifies authentication (optional, but highly recommended for its features).
+* `jwt-decode`: Decodes JWTs on the client-side.
+
+
+## 3. Implementing Authentication with NextAuth.js
+
+NextAuth.js streamlines the authentication process. Configure it to connect to your PostgreSQL database.  (Refer to NextAuth.js documentation for detailed configuration)
+
+
+```javascript
+// pages/api/auth/[...nextauth].js
+import NextAuth from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient()
+
+export default NextAuth({
+  adapter: PrismaAdapter(prisma),
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        const user = await prisma.user.findFirst({
+          where: {
+            username: credentials.username,
+          },
+        });
+
+        if (!user || user.password !== credentials.password) { // This is a simplification - use bcrypt to verify
+          return null;
+        }
+
+        return user;
+      },
+    }),
+  ],
+  secret: process.env.NEXTAUTH_SECRET,
+  callbacks: {
+        async jwt({ token, user }) {
+          if (user) {
+            token.userRole = user.role; // Add user role to JWT
+          }
+          return token;
+        },
+        async session({ session, token }) {
+          session.user.userRole = token.userRole;
+          return session;
+        }
+      },
+
+});
+```
+
+## 4. Implementing Role-Based Access Control (RBAC)
+
+Now, let's enforce RBAC.  We'll use the `userRole` property added to the JWT in the previous step.
+
+```javascript
+// pages/protected-page.js
+import { getSession } from "next-auth/react";
+
+export default function ProtectedPage({ userRole }) {
+  if (!userRole || userRole !== 'admin') {
+    return <p>Access Denied</p>;
+  }
+
+  return (
+    <div>
+      <h1>Welcome, Admin!</h1>
+      <p>This page is only accessible to administrators.</p>
+    </div>
+  );
+}
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    }
+  }
+  return {
+    props: { userRole: session.user.userRole },
+  };
+}
+
+```
+
+This `ProtectedPage` component checks the `userRole` from the session, granting access only to administrators.  You'll need to adapt this to your specific routes and roles.
+
+
+## 5. Client-side JWT Handling (Optional, for additional checks)
+
+You can decode the JWT on the client-side for additional checks or UI updates.
+
+```javascript
+import jwtDecode from "jwt-decode";
+// ... other imports
+
+const token = getCookie("next-auth.session-token") //Get token from cookie
+const decodedToken = jwtDecode(token);
+const userRole = decodedToken.userRole;
+```
+
+This provides a more robust way to handle authorization, although server-side checks remain crucial for security.
+
+Remember to handle errors gracefully and implement robust security practices throughout your application. This detailed guide provides a foundation for secure authentication and RBAC in your Next.js 15 application with PostgreSQL.  Always prioritize security best practices, including secure password hashing and input sanitization.

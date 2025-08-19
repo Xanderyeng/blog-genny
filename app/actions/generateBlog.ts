@@ -56,6 +56,19 @@ Your content here...`;
             `"${currentDate}"`
         );
 
+        // Also handle cases where AI might generate a different date format
+        // Replace any date in YYYY-MM-DD format with our current date
+        generatedContent = generatedContent.replace(
+            /date:\s*"[\d]{4}-[\d]{2}-[\d]{2}"/g,
+            `date: "${currentDate}"`
+        );
+
+        // Also handle dates without quotes
+        generatedContent = generatedContent.replace(
+            /date:\s*[\d]{4}-[\d]{2}-[\d]{2}/g,
+            `date: "${currentDate}"`
+        );
+
         // Generate a slug from the topic
         const slug = topic
             .toLowerCase()

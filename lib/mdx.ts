@@ -12,6 +12,8 @@ export interface BlogPost {
   tags: string[]
   readingTime: string
   content: string
+  coverImageUrl?: string
+  coverImageAttribution?: string
 }
 
 export async function getAllPosts(): Promise<BlogPost[]> {
@@ -44,6 +46,8 @@ export async function getAllPosts(): Promise<BlogPost[]> {
         tags: data.tags || [],
         readingTime: `${readingTime} min read`,
         content,
+        coverImageUrl: data.coverImageUrl,
+        coverImageAttribution: data.coverImageAttribution,
       }
     })
 
@@ -78,6 +82,8 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
       tags: data.tags || [],
       readingTime: `${readingTime} min read`,
       content,
+      coverImageUrl: data.coverImageUrl,
+      coverImageAttribution: data.coverImageAttribution,
     }
   } catch (error) {
     console.error(`Error reading post ${slug}:`, error)
