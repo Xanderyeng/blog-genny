@@ -9,9 +9,9 @@ import { ArticleEditForm } from "@/components/article-edit-form"
 export default async function EditArticlePage({
   params,
 }: {
-  params: { id: string } // Updated params type for Next.js 15
+  params: Promise<{ id: string }> // Updated params type for Next.js 15
 }) {
-  const { id } = params
+  const { id } = await params
 
   const session = await getServerSession(authOptions)
 
