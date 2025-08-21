@@ -7,16 +7,16 @@ import { eq, and } from "drizzle-orm"
 
 function fixMalformedContent(content: string): string {
     if (!content) return ""
-    
-    let fixed = content
+
+    const fixed = content
         .replace(/\r\n/g, '\n')
         .replace(/\r/g, '\n')
-    
+
     // Fix incomplete code blocks
     const lines = fixed.split('\n')
     const fixedLines: string[] = []
     let insideCodeBlock = false
-    
+
     for (const line of lines) {
         const codeBlockMatch = line.match(/^```(\w+)?/)
         if (codeBlockMatch && !insideCodeBlock) {
@@ -24,32 +24,32 @@ function fixMalformedContent(content: string): string {
             fixedLines.push(line)
             continue
         }
-        
+
         if (line.trim() === '```' && insideCodeBlock) {
             insideCodeBlock = false
             fixedLines.push(line)
             continue
         }
-        
+
         fixedLines.push(line)
     }
-    
+
     // Close any unclosed code blocks
     if (insideCodeBlock) {
         fixedLines.push('```')
     }
-    
+
     // More aggressive brace handling
-    let processedContent = fixedLines.join('\n')
+    const processedContent = fixedLines.join('\n')
     const processedLines = processedContent.split('\n').map((line, index) => {
         const beforeLine = fixedLines.slice(0, index).join('\n')
         const codeBlockCount = (beforeLine.match(/```/g) || []).length
         const currentlyInsideCodeBlock = codeBlockCount % 2 === 1
-        
+
         if (currentlyInsideCodeBlock) {
             return line
         }
-        
+
         // Aggressively escape all problematic characters outside code blocks
         return line
             .replace(/\{/g, "\\{")
@@ -57,7 +57,7 @@ function fixMalformedContent(content: string): string {
             .replace(/\$\\?\{/g, "\\${")
             .replace(/`(?!`)/g, "\\`")
     })
-    
+
     return processedLines.join('\n')
         .replace(/^(#{1,6})\s*(.+)$/gm, '$1 $2')
         .replace(/\$\{([^}]*)\}/g, '\\${$1\\}')
@@ -72,7 +72,7 @@ export async function POST(
     try {
         const { id } = await params
         const session = await getServerSession(authOptions)
-        
+
         if (!session?.user?.email) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
@@ -105,11 +105,11 @@ export async function POST(
 
         const originalContent = article[0].content
         const fixedContent = fixMalformedContent(originalContent)
-        
+
         // Update the article with fixed content
         const updatedArticle = await db
             .update(articles)
-            .set({ 
+            .set({
                 content: fixedContent,
                 updatedAt: new Date()
             })

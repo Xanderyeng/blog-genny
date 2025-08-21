@@ -363,7 +363,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
             <span>Active Sessions</span>
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            These are the devices and locations where you're currently signed in.
+            These are the devices and locations where you&apos;re currently signed in.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

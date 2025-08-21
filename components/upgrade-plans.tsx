@@ -159,7 +159,7 @@ export function UpgradePlans() {
             <CardContent className="p-6">
               <h3 className="font-semibold mb-2">Can I cancel anytime?</h3>
               <p className="text-sm text-muted-foreground">
-                Yes, you can cancel your subscription at any time. You'll continue to have access to premium features until the end of your billing period.
+                Yes, you can cancel your subscription at any time. You&apos;ll continue to have access to premium features until the end of your billing period.
               </p>
             </CardContent>
           </Card>
@@ -168,7 +168,7 @@ export function UpgradePlans() {
             <CardContent className="p-6">
               <h3 className="font-semibold mb-2">What happens to my articles if I downgrade?</h3>
               <p className="text-sm text-muted-foreground">
-                All your existing articles remain accessible. However, you'll be limited to creating 5 new articles per month on the free plan.
+                All your existing articles remain accessible. However, you&apos;ll be limited to creating 5 new articles per month on the free plan.
               </p>
             </CardContent>
           </Card>
@@ -177,7 +177,7 @@ export function UpgradePlans() {
             <CardContent className="p-6">
               <h3 className="font-semibold mb-2">Do you offer refunds?</h3>
               <p className="text-sm text-muted-foreground">
-                We offer a 7-day money-back guarantee. If you're not satisfied within the first week, we'll provide a full refund.
+                We offer a 7-day money-back guarantee. If you&apos;re not satisfied within the first week, we&apos;ll provide a full refund.
               </p>
             </CardContent>
           </Card>

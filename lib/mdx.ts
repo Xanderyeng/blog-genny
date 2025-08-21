@@ -1,6 +1,13 @@
+
 import fs from "fs"
 import path from "path"
 import matter from "gray-matter"
+
+// Export sanitizeMDXContent utility
+export function sanitizeMDXContent(content: string): string {
+  // Basic sanitization: replace unescaped quotes and problematic characters
+  return content.replace(/"/g, '&quot;')
+}
 
 const contentDirectory = path.join(process.cwd(), "content/blog")
 

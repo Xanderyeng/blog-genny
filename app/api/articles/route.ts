@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url)
         const limit = searchParams.get("limit")
 
-        const options = limit ? { limit: parseInt(limit) } : undefined
+       const options = limit ? { limit: parseInt(limit) } : {}
         const result = await getArticles(options)
 
         return NextResponse.json(result)

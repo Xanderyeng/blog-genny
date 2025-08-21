@@ -477,7 +477,7 @@ export function SettingsContent() {
                   <div>
                     <h4 className="font-medium text-yellow-800 dark:text-yellow-200">Security Notice</h4>
                     <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                      Enabling two-factor authentication and limiting login attempts will enhance your blog's security.
+                      Enabling two-factor authentication and limiting login attempts will enhance your blog&apos;s security.
                     </p>
                   </div>
                 </div>

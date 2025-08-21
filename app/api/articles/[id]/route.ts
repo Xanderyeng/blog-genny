@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { publishArticle, archiveArticle, deleteArticle, unpublishArticle, getArticleById, updateArticle } from "@/lib/articles"
+import { publishArticle, archiveArticle, deleteArticle, unpublishArticle, getArticleByIdOrSlug, updateArticle } from "@/lib/articles"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
@@ -30,22 +30,14 @@ export async function GET(
         }
 
         // Get article and verify ownership
-        const article = await db
-            .select()
-            .from(articles)
-            .where(
-                and(
-                    eq(articles.id, id),
-                    eq(articles.authorId, user[0].id)
-                )
-            )
-            .limit(1)
+       const article = await getArticleByIdOrSlug(id)
 
-        if (!article[0]) {
-            return NextResponse.json({ error: "Article not found" }, { status: 404 })
+        // Add an additional check for article ownership if needed
+        if (!article || article.authorId !== user[0].id) {
+            return NextResponse.json({ error: "Article not found or not owned by user" }, { status: 404 })
         }
 
-        return NextResponse.json(article[0])
+        return NextResponse.json(article)
     } catch (error) {
         console.error("Error getting article:", error)
         return NextResponse.json(

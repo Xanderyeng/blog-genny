@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { 
   CreditCard, 
   Calendar, 
@@ -155,13 +154,13 @@ export function BillingSettings({ user }: BillingSettingsProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "active":
-        return <CheckCircle className="h-4 w-4 text-green-600" />
+        return <CheckCircle className="w-4 h-4 text-green-600" />
       case "cancelled":
-        return <XCircle className="h-4 w-4 text-red-600" />
+        return <XCircle className="w-4 h-4 text-red-600" />
       case "past_due":
-        return <AlertTriangle className="h-4 w-4 text-yellow-600" />
+        return <AlertTriangle className="w-4 h-4 text-yellow-600" />
       default:
-        return <RefreshCw className="h-4 w-4 text-blue-600" />
+        return <RefreshCw className="w-4 h-4 text-blue-600" />
     }
   }
 
@@ -184,27 +183,27 @@ export function BillingSettings({ user }: BillingSettingsProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Crown className="h-5 w-5" />
+            <Crown className="w-5 h-5" />
             <span>Current Subscription</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {isPremium ? (
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg border">
+              <div className="flex justify-between items-center bg-gradient-to-r from-purple-50 dark:from-purple-950/20 to-blue-50 dark:to-blue-950/20 p-4 border rounded-lg">
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2">
                     <h3 className="font-semibold">Premium Plan</h3>
                     {getStatusIcon(mockSubscription.status)}
                     <Badge variant="default">Active</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {formatCurrency(mockSubscription.amount)} / {mockSubscription.interval}
                   </p>
                 </div>
-                <div className="text-right space-y-1">
-                  <p className="text-sm font-medium">Next billing date</p>
-                  <p className="text-sm text-muted-foreground">
+                <div className="space-y-1 text-right">
+                  <p className="font-medium text-sm">Next billing date</p>
+                  <p className="text-muted-foreground text-sm">
                     {formatDate(mockSubscription.nextBillingDate)}
                   </p>
                 </div>
@@ -216,9 +215,9 @@ export function BillingSettings({ user }: BillingSettingsProps) {
                   disabled={isLoading}
                   className="flex items-center space-x-2"
                 >
-                  <Settings className="h-4 w-4" />
+                  <Settings className="w-4 h-4" />
                   <span>Manage Billing</span>
-                  <ExternalLink className="h-3 w-3" />
+                  <ExternalLink className="w-3 h-3" />
                 </Button>
                 
                 <Button 
@@ -230,14 +229,14 @@ export function BillingSettings({ user }: BillingSettingsProps) {
               </div>
             </div>
           ) : (
-            <div className="text-center p-6">
-              <Crown className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Free Plan</h3>
-              <p className="text-muted-foreground mb-4">
-                You're currently on the free plan. Upgrade to Premium for unlimited features.
+            <div className="p-6 text-center">
+              <Crown className="mx-auto mb-4 w-12 h-12 text-muted-foreground" />
+              <h3 className="mb-2 font-semibold text-lg">Free Plan</h3>
+              <p className="mb-4 text-muted-foreground">
+                You&apos;re currently on the free plan. Upgrade to Premium for unlimited features.
               </p>
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                <Crown className="h-4 w-4 mr-2" />
+              <Button className="bg-gradient-to-r from-purple-600 hover:from-purple-700 to-blue-600 hover:to-blue-700">
+                <Crown className="mr-2 w-4 h-4" />
                 Upgrade to Premium
               </Button>
             </div>
@@ -250,33 +249,33 @@ export function BillingSettings({ user }: BillingSettingsProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <CreditCard className="h-5 w-5" />
+              <CreditCard className="w-5 h-5" />
               <span>Payment Methods</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
               {mockPaymentMethods.map((method) => (
-                <div key={method.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div key={method.id} className="flex justify-between items-center p-4 border rounded-lg">
                   <div className="flex items-center space-x-3">
                     {method.type === "card" ? (
                       <div className="flex items-center space-x-2">
-                        <CreditCard className="h-5 w-5 text-muted-foreground" />
+                        <CreditCard className="w-5 h-5 text-muted-foreground" />
                         <div>
                           <p className="font-medium">
-                            {method.brand.toUpperCase()} •••• {method.last4}
+                            {(method.brand ? method.brand.toUpperCase() : "CARD")} •••• {method.last4}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             Expires {method.expiryMonth}/{method.expiryYear}
                           </p>
                         </div>
                       </div>
                     ) : (
                       <div className="flex items-center space-x-2">
-                        <DollarSign className="h-5 w-5 text-muted-foreground" />
+                        <DollarSign className="w-5 h-5 text-muted-foreground" />
                         <div>
                           <p className="font-medium">PayPal</p>
-                          <p className="text-sm text-muted-foreground">{method.email}</p>
+                          <p className="text-muted-foreground text-sm">{method.email}</p>
                         </div>
                       </div>
                     )}
@@ -300,7 +299,7 @@ export function BillingSettings({ user }: BillingSettingsProps) {
             </div>
             
             <Button variant="outline" className="w-full">
-              <CreditCard className="h-4 w-4 mr-2" />
+              <CreditCard className="mr-2 w-4 h-4" />
               Add Payment Method
             </Button>
           </CardContent>
@@ -312,17 +311,17 @@ export function BillingSettings({ user }: BillingSettingsProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Receipt className="h-5 w-5" />
+              <Receipt className="w-5 h-5" />
               <span>Billing History</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {mockInvoices.map((invoice) => (
-                <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div key={invoice.id} className="flex justify-between items-center p-4 border rounded-lg">
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm">{formatDate(invoice.date)}</span>
                     </div>
                     <Badge variant={getStatusColor(invoice.status)}>
@@ -335,7 +334,7 @@ export function BillingSettings({ user }: BillingSettingsProps) {
                       {formatCurrency(invoice.amount)}
                     </span>
                     <Button variant="ghost" size="sm">
-                      <Download className="h-4 w-4 mr-1" />
+                      <Download className="mr-1 w-4 h-4" />
                       Download
                     </Button>
                   </div>
@@ -345,7 +344,7 @@ export function BillingSettings({ user }: BillingSettingsProps) {
             
             <div className="mt-4 pt-4 border-t">
               <Button variant="outline" className="w-full">
-                <Clock className="h-4 w-4 mr-2" />
+                <Clock className="mr-2 w-4 h-4" />
                 View All Invoices
               </Button>
             </div>
@@ -360,23 +359,23 @@ export function BillingSettings({ user }: BillingSettingsProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-sm">Articles this month</span>
-              <span className="text-sm font-medium">
+              <span className="font-medium text-sm">
                 {isPremium ? "Unlimited" : "3 / 5"}
               </span>
             </div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-sm">AI generations</span>
-              <span className="text-sm font-medium">
+              <span className="font-medium text-sm">
                 {isPremium ? "Unlimited" : "8 / 10"}
               </span>
             </div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-sm">Storage used</span>
-              <span className="text-sm font-medium">2.1 GB / ∞</span>
+              <span className="font-medium text-sm">2.1 GB / ∞</span>
             </div>
           </div>
         </CardContent>
@@ -384,10 +383,10 @@ export function BillingSettings({ user }: BillingSettingsProps) {
 
       {/* Cancel Subscription Dialog */}
       {showCancelDialog && (
-        <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
+        <Card className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-red-600 dark:text-red-400">
-              <AlertTriangle className="h-5 w-5" />
+              <AlertTriangle className="w-5 h-5" />
               <span>Cancel Subscription</span>
             </CardTitle>
           </CardHeader>
@@ -395,7 +394,7 @@ export function BillingSettings({ user }: BillingSettingsProps) {
             <p className="text-sm">
               Are you sure you want to cancel your Premium subscription? You will:
             </p>
-            <ul className="text-sm space-y-1 ml-4">
+            <ul className="space-y-1 ml-4 text-sm">
               <li>• Lose access to premium features at the end of your billing period</li>
               <li>• Keep all your existing articles and data</li>
               <li>• Be limited to 5 articles per month on the free plan</li>

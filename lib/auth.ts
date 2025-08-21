@@ -1,37 +1,31 @@
-import NextAuth from "next-auth"
-import { DrizzleAdapter } from "@auth/drizzle-adapter"
+import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { db } from "@/lib/db"
-import { users, accounts, sessions, verificationTokens } from "@/lib/schema"
+import { users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 import bcrypt from "bcryptjs"
-import type { NextAuthOptions } from "next-auth"
 
 export const authOptions: NextAuthOptions = {
-  adapter: DrizzleAdapter(db) as any,
   providers: [
     CredentialsProvider({
+      name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: any) {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           return null
         }
 
-        const user = await db
-          .select()
-          .from(users)
-          .where(eq(users.email, credentials.email as string))
-          .limit(1)
+        const user = await db.select().from(users).where(eq(users.email, credentials.email)).limit(1)
 
         if (!user[0]) {
           return null
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password as string, user[0].password || "")
+        const isPasswordValid = await bcrypt.compare(credentials.password, user[0].password || "")
 
         if (!isPasswordValid) {
           return null
@@ -41,8 +35,8 @@ export const authOptions: NextAuthOptions = {
           id: user[0].id,
           email: user[0].email,
           name: user[0].name,
-          role: user[0].role,
-          tier: user[0].tier,
+          role: user[0].role as "user" | "admin",
+          tier: user[0].tier as "free" | "premium",
         }
       },
     }),
@@ -55,15 +49,22 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.role = user.role
         token.tier = user.tier
+      } else if (account?.provider === "google" && token.email) {
+        // Fetch user data from database for Google sign-ins
+        const dbUser = await db.select().from(users).where(eq(users.email, token.email)).limit(1)
+        if (dbUser[0]) {
+          token.role = dbUser[0].role as "user" | "admin"
+          token.tier = dbUser[0].tier as "free" | "premium"
+        }
       }
       return token
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id = token.sub!
         session.user.role = token.role as "user" | "admin"
         session.user.tier = token.tier as "free" | "premium"
@@ -74,11 +75,4 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
   },
-}
-
-export default NextAuth(authOptions)
-
-// Export for server-side usage
-export const getServerSession = (req: any, res: any) => {
-  return NextAuth(authOptions).getServerSession(req, res)
 }

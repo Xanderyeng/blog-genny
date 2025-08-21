@@ -5,6 +5,14 @@ import { db } from "@/lib/db"
 import { users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 
+interface UserUpdateData {
+    updatedAt?: Date; // Make optional as it's set later
+    role?: "user" | "admin";
+    tier?: "free" | "premium";
+    name?: string;
+    email?: string;
+}
+
 // Get single user
 export async function GET(
   request: NextRequest,
@@ -58,7 +66,7 @@ export async function PATCH(
     const { role, tier, name, email } = body
 
     // Validate the update data
-    const updateData: any = { updatedAt: new Date() }
+    const updateData: UserUpdateData = { updatedAt: new Date() }
     
     if (role && ["user", "admin"].includes(role)) {
       updateData.role = role

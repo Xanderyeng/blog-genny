@@ -60,21 +60,21 @@ export default function SearchPage() {
     return (
         <>
             <Header />
-            <main className="min-h-screen bg-background">
-                <div className="container mx-auto px-4 py-8">
+            <main className="bg-background min-h-screen">
+                <div className="mx-auto px-4 py-8 container">
                     <div className="mb-8 text-center">
-                        <div className="flex items-center justify-center mb-4">
-                            <Search className="h-8 w-8 text-primary mr-3" />
-                            <h1 className="text-4xl font-bold tracking-tight">Search Blog Posts</h1>
+                        <div className="flex justify-center items-center mb-4">
+                            <Search className="mr-3 w-8 h-8 text-primary" />
+                            <h1 className="font-bold text-4xl tracking-tight">Search Blog Posts</h1>
                         </div>
-                        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                        <p className="mx-auto max-w-2xl text-muted-foreground text-xl">
                             Find the perfect blog post by searching through titles, descriptions, tags, and content.
                         </p>
                     </div>
 
-                    <div className="max-w-2xl mx-auto mb-8">
+                    <div className="mx-auto mb-8 max-w-2xl">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Search className="top-1/2 left-3 absolute w-4 h-4 text-muted-foreground -translate-y-1/2 transform" />
                             <Input
                                 type="text"
                                 placeholder="Search for blog posts..."
@@ -87,33 +87,33 @@ export default function SearchPage() {
 
                     <div className="space-y-6">
                         {isLoading ? (
-                            <div className="text-center py-12">
+                            <div className="py-12 text-center">
                                 <p className="text-muted-foreground">Loading posts...</p>
                             </div>
                         ) : filteredPosts.length > 0 ? (
                             <>
-                                <div className="text-sm text-muted-foreground mb-4">
+                                <div className="mb-4 text-muted-foreground text-sm">
                                     {searchTerm ? (
                                         <>
-                                            Found {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""} for "{searchTerm}"
+                                            Found {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""} for &quot;{searchTerm}&quot;
                                         </>
                                     ) : (
                                         <>Showing all {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""}</>
                                     )}
                                 </div>
-                                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                <div className="gap-6 grid md:grid-cols-2 lg:grid-cols-3">
                                     {filteredPosts.map((post) => (
                                         <BlogCard key={post.slug} post={post} />
                                     ))}
                                 </div>
                             </>
                         ) : (
-                            <div className="text-center py-12">
-                                <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                <p className="text-muted-foreground mb-2">
+                            <div className="py-12 text-center">
+                                <Search className="mx-auto mb-4 w-12 h-12 text-muted-foreground" />
+                                <p className="mb-2 text-muted-foreground">
                                     {searchTerm ? `No posts found for "${searchTerm}"` : "No posts available"}
                                 </p>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-muted-foreground text-sm">
                                     {searchTerm ? "Try searching with different keywords." : "Start by generating your first blog post!"}
                                 </p>
                             </div>

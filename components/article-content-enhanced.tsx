@@ -2,21 +2,44 @@ import { Suspense } from "react"
 import { MDXRemote } from "next-mdx-remote/rsc"
 import { Skeleton } from "@/components/ui/skeleton"
 
-interface ArticleContentProps {
-    content: string
+// Define a generic interface for MDX component props
+interface MDXComponentProps {
+    children?: React.ReactNode;
+    // Allow any other props, such as 'id' or 'className', but be specific where possible.
+    [key: string]: unknown;
+}
+
+interface HeadingProps extends MDXComponentProps {
+    id?: string; // Headings often have an ID
+}
+
+interface CodeProps extends MDXComponentProps {
+    className?: string; // For syntax highlighting language
+}
+
+interface AnchorProps extends MDXComponentProps {
+    href?: string;
+    target?: string;
+    rel?: string;
+}
+
+interface ImgProps extends MDXComponentProps {
+    src?: string;
+    alt?: string;
+    title?: string; // Common img attribute
 }
 
 function ArticleContentSkeleton() {
     return (
-        <article className="prose prose-lg max-w-none">
+        <article className="max-w-none prose prose-lg">
             <div className="space-y-6">
                 {/* Paragraph skeletons */}
                 {Array.from({ length: 12 }).map((_, i) => (
                     <div key={i} className="space-y-3">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-3/4" />
-                        {i % 4 === 3 && <Skeleton className="h-8 w-1/2 mt-6" />}
+                        <Skeleton className="w-full h-4" />
+                        <Skeleton className="w-full h-4" />
+                        <Skeleton className="w-3/4 h-4" />
+                        {i % 4 === 3 && <Skeleton className="mt-6 w-1/2 h-8" />}
                     </div>
                 ))}
             </div>
@@ -25,110 +48,116 @@ function ArticleContentSkeleton() {
 }
 
 const mdxComponents = {
-    h1: ({ children }: any) => (
-        <h1 className="text-3xl font-bold mt-8 mb-6 text-foreground border-b border-border pb-2">
+    h1: ({ children, ...props }: HeadingProps) => (
+        <h1 className="mt-8 mb-6 pb-2 border-b border-border font-bold text-foreground text-3xl" {...props}>
             {children}
         </h1>
     ),
-    h2: ({ children }: any) => (
-        <h2 className="text-2xl font-semibold mt-8 mb-4 text-foreground">
+    h2: ({ children, ...props }: HeadingProps) => (
+        <h2 className="mt-8 mb-4 font-semibold text-foreground text-2xl" {...props}>
             {children}
         </h2>
     ),
-    h3: ({ children }: any) => (
-        <h3 className="text-xl font-medium mt-6 mb-3 text-foreground">
+    h3: ({ children, ...props }: HeadingProps) => (
+        <h3 className="mt-6 mb-3 font-medium text-foreground text-xl" {...props}>
             {children}
         </h3>
     ),
-    h4: ({ children }: any) => (
-        <h4 className="text-lg font-medium mt-4 mb-2 text-foreground">
+    h4: ({ children, ...props }: HeadingProps) => (
+        <h4 className="mt-4 mb-2 font-medium text-foreground text-lg" {...props}>
             {children}
         </h4>
     ),
-    p: ({ children }: any) => (
-        <p className="mb-4 leading-relaxed text-foreground">
+    p: ({ children, ...props }: MDXComponentProps) => (
+        <p className="mb-4 text-foreground leading-relaxed" {...props}>
             {children}
         </p>
     ),
-    pre: ({ children }: any) => (
-        <pre className="bg-muted/50 p-4 rounded-lg overflow-x-auto mb-6 border border-border">
+    pre: ({ children, ...props }: MDXComponentProps) => (
+        <pre className="bg-muted/50 mb-6 p-4 border border-border rounded-lg overflow-x-auto" {...props}>
             {children}
         </pre>
     ),
-    code: ({ children, className }: any) => {
+    code: ({ children, className, ...props }: CodeProps) => {
         const isInline = !className
         if (isInline) {
             return (
-                <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground border">
+                <code className="bg-muted px-1.5 py-0.5 border rounded font-mono text-foreground text-sm" {...props}>
                     {children}
                 </code>
             )
         }
         return (
-            <code className={`text-sm font-mono text-foreground ${className || ''}`}>
+            <code className={`text-sm font-mono text-foreground ${className || ''}`} {...props}>
                 {children}
             </code>
         )
     },
-    ul: ({ children }: any) => (
-        <ul className="list-disc list-inside mb-4 space-y-2 text-foreground">
+    ul: ({ children, ...props }: MDXComponentProps) => (
+        <ul className="space-y-2 mb-4 text-foreground list-disc list-inside" {...props}>
             {children}
         </ul>
     ),
-    ol: ({ children }: any) => (
-        <ol className="list-decimal list-inside mb-4 space-y-2 text-foreground">
+    ol: ({ children, ...props }: MDXComponentProps) => (
+        <ol className="space-y-2 mb-4 text-foreground list-decimal list-inside" {...props}>
             {children}
         </ol>
     ),
-    li: ({ children }: any) => (
-        <li className="text-foreground ml-2">
+    li: ({ children, ...props }: MDXComponentProps) => (
+        <li className="ml-2 text-foreground" {...props}>
             {children}
         </li>
     ),
-    blockquote: ({ children }: any) => (
-        <blockquote className="border-l-4 border-primary pl-4 italic my-6 text-muted-foreground bg-muted/30 py-2">
+    blockquote: ({ children, ...props }: MDXComponentProps) => (
+        <blockquote className="bg-muted/30 my-6 py-2 pl-4 border-primary border-l-4 text-muted-foreground italic" {...props}>
             {children}
         </blockquote>
     ),
-    a: ({ children, href }: any) => (
+    a: ({ children, href, ...props }: AnchorProps) => (
         <a
             href={href}
             className="text-primary hover:text-primary/80 underline underline-offset-2"
             target={href?.startsWith('http') ? '_blank' : undefined}
             rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+            {...props}
         >
             {children}
         </a>
     ),
-    img: ({ src, alt }: any) => (
+    img: ({ src, alt, ...props }: ImgProps) => (
         <img
             src={src}
             alt={alt}
-            className="rounded-lg shadow-md my-6 max-w-full h-auto"
+            className="shadow-md my-6 rounded-lg max-w-full h-auto"
+            {...props}
         />
     ),
-    table: ({ children }: any) => (
-        <div className="overflow-x-auto my-6">
-            <table className="min-w-full border border-border rounded-lg">
+    table: ({ children, ...props }: MDXComponentProps) => (
+        <div className="my-6 overflow-x-auto">
+            <table className="border border-border rounded-lg min-w-full" {...props}>
                 {children}
             </table>
         </div>
     ),
-    th: ({ children }: any) => (
-        <th className="bg-muted px-4 py-2 text-left font-medium text-foreground border-b border-border">
+    th: ({ children, ...props }: MDXComponentProps) => (
+        <th className="bg-muted px-4 py-2 border-b border-border font-medium text-foreground text-left" {...props}>
             {children}
         </th>
     ),
-    td: ({ children }: any) => (
-        <td className="px-4 py-2 text-foreground border-b border-border/50">
+    td: ({ children, ...props }: MDXComponentProps) => (
+        <td className="px-4 py-2 border-b border-border/50 text-foreground" {...props}>
             {children}
         </td>
     ),
 }
 
+interface ArticleContentProps {
+    content: string
+}
+
 async function ArticleContent({ content }: ArticleContentProps) {
     return (
-        <article className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground">
+        <article className="max-w-none prose-code:text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose prose-lg">
             <MDXRemote
                 source={content}
                 components={mdxComponents}

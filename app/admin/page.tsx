@@ -1,104 +1,160 @@
 import { AdminDashboardLayout } from "@/components/admin-dashboard-layout"
-import { DraftArticleTable } from "@/components/draft-article-table"
+import { Article, DraftArticleTable } from "@/components/draft-article-table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { FileText, Users, TrendingUp, Clock } from "lucide-react"
-import { getArticlesAction, getArticleStatsAction } from "@/app/actions/articleActions"
+import { getArticlesAction } from "@/app/actions/articleActions"
+import Link from 'next/link'
+import { getArticleStatsAction } from '../actions/get-articles-action'
+
+// Define interfaces for your data structures
+interface Author {
+  id: string;
+  name: string | null;
+  email: string;
+}
+
+// interface Article {
+//   id: string;
+//   title: string;
+//   status: 'draft' | 'published' | 'archived'; // Example statuses
+//   authorId?: string; // Original authorId from the data
+//   author?: Author; // Enriched author object
+// }
+
+interface GetArticlesResult {
+  success: boolean;
+  data?: {
+    articles: Article[];
+  };
+  error?: string;
+}
+
+interface ArticleStats {
+  draft: number;
+  published: number;
+  archived: number;
+}
+
+interface GetArticleStatsResult {
+  success: boolean;
+  data?: ArticleStats;
+  error?: string;
+}
 
 export default async function AdminDashboard() {
   // Fetch data on the server side
   const [articlesResult, statsResult] = await Promise.all([
-    getArticlesAction({ limit: 50 }),
-    getArticleStatsAction()
+    getArticlesAction({ limit: 50 }) as Promise<GetArticlesResult>,
+    getArticleStatsAction() as Promise<GetArticleStatsResult>
   ])
 
-  const articles = articlesResult.success && articlesResult.data ? articlesResult.data.articles : []
-  const stats = statsResult.success && statsResult.data ? statsResult.data : { draft: 0, published: 0, archived: 0 }
+  // Process articles data, ensuring author information is present
+  const articles: Article[] = articlesResult.success && articlesResult.data
+    ? articlesResult.data.articles.map((article) => ({
+        ...article,
+        author: article.author
+          ? article.author
+          : {
+              id: article.author ?? "",
+              name: null,
+              email: "",
+            },
+      }))
+    : []
+
+  const stats: ArticleStats = (statsResult.success && statsResult.data)
+    ? {
+        draft: Number(statsResult.data.draft) ?? 0,
+        published: Number(statsResult.data.published) ?? 0,
+        archived: Number(statsResult.data.archived) ?? 0
+      }
+    : { draft: 0, published: 0, archived: 0 }
 
   return (
     <AdminDashboardLayout>
       <div className="space-y-6">
         {/* Welcome Section */}
-        <div className="glass-light rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-2">Welcome back, Admin!</h2>
-          <p className="text-muted-foreground">Here's what's happening with your blog today.</p>
+        <div className="p-6 rounded-lg glass-light">
+          <h2 className="mb-2 font-semibold text-xl">Welcome back, Admin!</h2>
+          <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your blog today.</p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="gap-4 grid md:grid-cols-2 lg:grid-cols-4">
           <Card className="glass-light">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Draft Articles</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
+              <CardTitle className="font-medium text-sm">Draft Articles</CardTitle>
+              <FileText className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.draft}</div>
-              <p className="text-xs text-muted-foreground">Articles pending review</p>
+              <div className="font-bold text-2xl">{stats.draft}</div>
+              <p className="text-muted-foreground text-xs">Articles pending review</p>
             </CardContent>
           </Card>
 
           <Card className="glass-light">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Published Articles</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
+              <CardTitle className="font-medium text-sm">Published Articles</CardTitle>
+              <TrendingUp className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.published}</div>
-              <p className="text-xs text-muted-foreground">Live on the blog</p>
+              <div className="font-bold text-2xl">{stats.published}</div>
+              <p className="text-muted-foreground text-xs">Live on the blog</p>
             </CardContent>
           </Card>
 
           <Card className="glass-light">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Archived Articles</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
+              <CardTitle className="font-medium text-sm">Archived Articles</CardTitle>
+              <Users className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.archived}</div>
-              <p className="text-xs text-muted-foreground">No longer active</p>
+              <div className="font-bold text-2xl">{stats.archived}</div>
+              <p className="text-muted-foreground text-xs">No longer active</p>
             </CardContent>
           </Card>
 
           <Card className="glass-light">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
+              <CardTitle className="font-medium text-sm">Total Articles</CardTitle>
+              <Clock className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.draft + stats.published + stats.archived}</div>
-              <p className="text-xs text-muted-foreground">All articles created</p>
+              <div className="font-bold text-2xl">{stats.draft + stats.published + stats.archived}</div>
+              <p className="text-muted-foreground text-xs">All articles created</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Recent Activity */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="gap-6 grid lg:grid-cols-2">
           <Card className="glass-light">
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-4">
-                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <div className="bg-green-500 rounded-full w-2 h-2"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">New article generated</p>
-                  <p className="text-xs text-muted-foreground">2 minutes ago</p>
+                  <p className="font-medium text-sm">New article generated</p>
+                  <p className="text-muted-foreground text-xs">2 minutes ago</p>
                 </div>
                 <Badge variant="secondary">Draft</Badge>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                <div className="bg-blue-500 rounded-full w-2 h-2"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Article published</p>
-                  <p className="text-xs text-muted-foreground">1 hour ago</p>
+                  <p className="font-medium text-sm">Article published</p>
+                  <p className="text-muted-foreground text-xs">1 hour ago</p>
                 </div>
                 <Badge variant="default">Published</Badge>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="h-2 w-2 rounded-full bg-orange-500"></div>
+                <div className="bg-orange-500 rounded-full w-2 h-2"></div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">New user registered</p>
-                  <p className="text-xs text-muted-foreground">3 hours ago</p>
+                  <p className="font-medium text-sm">New user registered</p>
+                  <p className="text-muted-foreground text-xs">3 hours ago</p>
                 </div>
                 <Badge variant="outline">User</Badge>
               </div>
@@ -110,28 +166,28 @@ export default async function AdminDashboard() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="grid gap-2">
+              <div className="gap-2 grid">
                 <a
                   href="/admin/generate"
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors"
+                  className="flex justify-between items-center hover:bg-accent p-3 border rounded-lg transition-colors"
                 >
                   <span className="font-medium">Generate New Article</span>
-                  <FileText className="h-4 w-4" />
+                  <FileText className="w-4 h-4" />
                 </a>
-                <a
+                <Link
                   href="/admin/articles"
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors"
+                  className="flex justify-between items-center hover:bg-accent p-3 border rounded-lg transition-colors"
                 >
                   <span className="font-medium">Review Drafts</span>
                   <Badge variant="secondary">{stats.draft}</Badge>
-                </a>
-                <a
+                </Link>
+                <Link
                   href="/admin/users"
-                  className="flex items-center justify-between p-3 rounded-lg border hover:bg-accent transition-colors"
+                  className="flex justify-between items-center hover:bg-accent p-3 border rounded-lg transition-colors"
                 >
                   <span className="font-medium">Manage Users</span>
-                  <Users className="h-4 w-4" />
-                </a>
+                  <Users className="w-4 h-4" />
+                </Link>
               </div>
             </CardContent>
           </Card>

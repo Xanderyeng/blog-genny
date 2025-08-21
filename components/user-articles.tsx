@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -66,9 +66,11 @@ interface UserArticlesProps {
   user: User
 }
 
+type ArticleStatus = "all" | "published" | "draft" | "archived";
+
 export function UserArticles({ articles, user }: UserArticlesProps) {
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "published" | "archived">("all")
+  const [statusFilter, setStatusFilter] = useState<ArticleStatus>("all")
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const router = useRouter()
 
@@ -153,14 +155,14 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="gap-4 grid grid-cols-1 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-blue-600" />
+              <FileText className="w-5 h-5 text-blue-600" />
               <div>
-                <p className="text-sm font-medium">Total Articles</p>
-                <p className="text-2xl font-bold">{statusCounts.all}</p>
+                <p className="font-medium text-sm">Total Articles</p>
+                <p className="font-bold text-2xl">{statusCounts.all}</p>
               </div>
             </div>
           </CardContent>
@@ -169,10 +171,10 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <Eye className="h-5 w-5 text-green-600" />
+              <Eye className="w-5 h-5 text-green-600" />
               <div>
-                <p className="text-sm font-medium">Published</p>
-                <p className="text-2xl font-bold">{statusCounts.published}</p>
+                <p className="font-medium text-sm">Published</p>
+                <p className="font-bold text-2xl">{statusCounts.published}</p>
               </div>
             </div>
           </CardContent>
@@ -181,10 +183,10 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <Edit className="h-5 w-5 text-yellow-600" />
+              <Edit className="w-5 h-5 text-yellow-600" />
               <div>
-                <p className="text-sm font-medium">Drafts</p>
-                <p className="text-2xl font-bold">{statusCounts.draft}</p>
+                <p className="font-medium text-sm">Drafts</p>
+                <p className="font-bold text-2xl">{statusCounts.draft}</p>
               </div>
             </div>
           </CardContent>
@@ -193,11 +195,11 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <BarChart3 className="h-5 w-5 text-purple-600" />
+              <BarChart3 className="w-5 h-5 text-purple-600" />
               <div>
-                <p className="text-sm font-medium">Views</p>
-                <p className="text-2xl font-bold">-</p>
-                <p className="text-xs text-muted-foreground">Coming soon</p>
+                <p className="font-medium text-sm">Views</p>
+                <p className="font-bold text-2xl">-</p>
+                <p className="text-muted-foreground text-xs">Coming soon</p>
               </div>
             </div>
           </CardContent>
@@ -205,10 +207,10 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
       </div>
 
       {/* Actions Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+      <div className="flex sm:flex-row flex-col justify-between items-start sm:items-center gap-4">
+        <div className="flex sm:flex-row flex-col gap-2 w-full sm:w-auto">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="top-1/2 left-3 absolute w-4 h-4 text-muted-foreground -translate-y-1/2 transform" />
             <Input
               placeholder="Search articles..."
               value={searchQuery}
@@ -219,8 +221,8 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
           
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="px-3 py-2 border rounded-md text-sm bg-background"
+            onChange={(e) => setStatusFilter(e.target.value as ArticleStatus)}
+            className="bg-background px-3 py-2 border rounded-md text-sm"
           >
             <option value="all">All Status ({statusCounts.all})</option>
             <option value="published">Published ({statusCounts.published})</option>
@@ -231,7 +233,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
 
         <Button asChild>
           <Link href="/generate">
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 w-4 h-4" />
             New Article
           </Link>
         </Button>
@@ -241,11 +243,11 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
       {filteredArticles.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
+            <FileText className="mx-auto mb-4 w-12 h-12 text-muted-foreground" />
+            <h3 className="mb-2 font-semibold text-lg">
               {articles.length === 0 ? "No articles yet" : "No articles found"}
             </h3>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-muted-foreground">
               {articles.length === 0 
                 ? "Start creating your first article to see it here."
                 : "Try adjusting your search or filter criteria."
@@ -254,7 +256,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
             {articles.length === 0 && (
               <Button asChild>
                 <Link href="/generate">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="mr-2 w-4 h-4" />
                   Create Your First Article
                 </Link>
               </Button>
@@ -266,10 +268,10 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
           {filteredArticles.map((article) => (
             <Card key={article.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0 mr-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 mr-4 min-w-0">
                     <div className="flex items-center space-x-2 mb-2">
-                      <h3 className="text-lg font-semibold truncate">
+                      <h3 className="font-semibold text-lg truncate">
                         {article.title}
                       </h3>
                       <Badge variant={getStatusColor(article.status)}>
@@ -278,22 +280,22 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                     </div>
                     
                     {article.description && (
-                      <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                      <p className="mb-3 text-muted-foreground text-sm line-clamp-2">
                         {article.description}
                       </p>
                     )}
                     
-                    <div className="flex items-center space-x-4 text-xs text-muted-foreground">
+                    <div className="flex items-center space-x-4 text-muted-foreground text-xs">
                       <div className="flex items-center space-x-1">
-                        <Calendar className="h-3 w-3" />
+                        <Calendar className="w-3 h-3" />
                         <span>Created {formatDate(article.createdAt)}</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Edit className="h-3 w-3" />
+                        <Edit className="w-3 h-3" />
                         <span>Updated {formatDate(article.updatedAt)}</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <User className="h-3 w-3" />
+                        <User className="w-3 h-3" />
                         <span>{user.name || user.email}</span>
                       </div>
                     </div>
@@ -304,14 +306,14 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                     {article.status === "published" && (
                       <Button asChild variant="outline" size="sm" title="View Published Article">
                         <Link href={`/blog/${article.slug}`} target="_blank">
-                          <Eye className="h-4 w-4" />
+                          <Eye className="w-4 h-4" />
                         </Link>
                       </Button>
                     )}
                     
                     <Button asChild variant="outline" size="sm" title="Edit Article">
                       <Link href={`/dashboard/articles/${article.id}/edit`}>
-                        <Edit className="h-4 w-4" />
+                        <Edit className="w-4 h-4" />
                       </Link>
                     </Button>
                     
@@ -323,7 +325,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                           size="sm" 
                           disabled={isLoading === article.id}
                         >
-                          <MoreHorizontal className="h-4 w-4" />
+                          <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
@@ -333,7 +335,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                             onClick={() => handleStatusChange(article.id, "publish")}
                             className="text-green-600"
                           >
-                            <CheckCircle className="mr-2 h-4 w-4" />
+                            <CheckCircle className="mr-2 w-4 h-4" />
                             Publish Article
                           </DropdownMenuItem>
                         )}
@@ -343,7 +345,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                             onClick={() => handleStatusChange(article.id, "unpublish")}
                             className="text-orange-600"
                           >
-                            <EyeOff className="mr-2 h-4 w-4" />
+                            <EyeOff className="mr-2 w-4 h-4" />
                             Unpublish (Move to Draft)
                           </DropdownMenuItem>
                         )}
@@ -353,7 +355,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                             onClick={() => handleStatusChange(article.id, "archive")}
                             className="text-gray-600"
                           >
-                            <Archive className="mr-2 h-4 w-4" />
+                            <Archive className="mr-2 w-4 h-4" />
                             Archive Article
                           </DropdownMenuItem>
                         )}
@@ -363,7 +365,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                         {/* Edit Actions */}
                         <DropdownMenuItem asChild>
                           <Link href={`/dashboard/articles/${article.id}/edit`}>
-                            <Edit className="mr-2 h-4 w-4" />
+                            <Edit className="mr-2 w-4 h-4" />
                             Edit Content
                           </Link>
                         </DropdownMenuItem>
@@ -371,7 +373,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                         {article.status === "published" && (
                           <DropdownMenuItem asChild>
                             <Link href={`/blog/${article.slug}`} target="_blank">
-                              <Eye className="mr-2 h-4 w-4" />
+                              <Eye className="mr-2 w-4 h-4" />
                               View Live Article
                             </Link>
                           </DropdownMenuItem>
@@ -386,7 +388,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                               onSelect={(e) => e.preventDefault()}
                               className="text-red-600 focus:text-red-600"
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
+                              <Trash2 className="mr-2 w-4 h-4" />
                               Delete Article
                             </DropdownMenuItem>
                           </AlertDialogTrigger>
@@ -394,7 +396,7 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the article "{article.title}" and remove all associated data.
+                                This action cannot be undone. This will permanently delete the article &quot;{article.title}&quot; and remove all associated data.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -421,13 +423,13 @@ export function UserArticles({ articles, user }: UserArticlesProps) {
 
       {/* Premium Features for Free Users */}
       {user.tier === "free" && articles.length >= 5 && (
-        <Card className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200 dark:border-purple-800">
+        <Card className="bg-gradient-to-r from-purple-50 dark:from-purple-950/20 to-blue-50 dark:to-blue-950/20 border-purple-200 dark:border-purple-800">
           <CardContent className="p-6 text-center">
-            <h3 className="text-lg font-semibold mb-2">Unlock More Features</h3>
-            <p className="text-muted-foreground mb-4">
+            <h3 className="mb-2 font-semibold text-lg">Unlock More Features</h3>
+            <p className="mb-4 text-muted-foreground">
               Upgrade to Premium for unlimited articles, advanced analytics, and more.
             </p>
-            <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+            <Button asChild className="bg-gradient-to-r from-purple-600 hover:from-purple-700 to-blue-600 hover:to-blue-700">
               <Link href="/upgrade">
                 Upgrade to Premium
               </Link>

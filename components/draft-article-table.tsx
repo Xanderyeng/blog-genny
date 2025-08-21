@@ -15,7 +15,7 @@ import {
   useDeleteArticle
 } from "@/hooks/useArticles"
 
-interface Article {
+export interface Article {
   id: string
   title: string
   slug: string
@@ -82,8 +82,8 @@ export function DraftArticleTable({ initialArticles, initialStats }: DraftArticl
 
   if (isLoading && !initialArticles) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="w-8 h-8 animate-spin" />
         <span className="ml-2">Loading articles...</span>
       </div>
     )
@@ -91,44 +91,44 @@ export function DraftArticleTable({ initialArticles, initialStats }: DraftArticl
 
   if (isError && !initialArticles) {
     return (
-      <div className="flex items-center justify-center p-8 text-red-500">
+      <div className="flex justify-center items-center p-8 text-red-500">
         Error loading articles. Please try again.
       </div>
     )
   } return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="gap-4 grid md:grid-cols-3">
         <Card className="glass-light">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Draft Articles</CardTitle>
+          <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
+            <CardTitle className="font-medium text-sm">Draft Articles</CardTitle>
             <Badge variant="secondary">{stats.draft}</Badge>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.draft}</div>
-            <p className="text-xs text-muted-foreground">Awaiting review</p>
+            <div className="font-bold text-2xl">{stats.draft}</div>
+            <p className="text-muted-foreground text-xs">Awaiting review</p>
           </CardContent>
         </Card>
 
         <Card className="glass-light">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Published</CardTitle>
+          <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
+            <CardTitle className="font-medium text-sm">Published</CardTitle>
             <Badge variant="default">{stats.published}</Badge>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.published}</div>
-            <p className="text-xs text-muted-foreground">Live articles</p>
+            <div className="font-bold text-2xl">{stats.published}</div>
+            <p className="text-muted-foreground text-xs">Live articles</p>
           </CardContent>
         </Card>
 
         <Card className="glass-light">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Articles</CardTitle>
+          <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
+            <CardTitle className="font-medium text-sm">Total Articles</CardTitle>
             <Badge variant="outline">{stats.draft + stats.published + stats.archived}</Badge>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.draft + stats.published + stats.archived}</div>
-            <p className="text-xs text-muted-foreground">All time</p>
+            <div className="font-bold text-2xl">{stats.draft + stats.published + stats.archived}</div>
+            <p className="text-muted-foreground text-xs">All time</p>
           </CardContent>
         </Card>
       </div>
@@ -156,7 +156,7 @@ export function DraftArticleTable({ initialArticles, initialStats }: DraftArticl
                   <TableCell className="font-medium">
                     <div>
                       <div className="font-medium">{article.title}</div>
-                      <div className="text-sm text-muted-foreground">/{article.slug}</div>
+                      <div className="text-muted-foreground text-sm">/{article.slug}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -169,26 +169,26 @@ export function DraftArticleTable({ initialArticles, initialStats }: DraftArticl
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" disabled={isMutating}>
-                          <MoreHorizontal className="h-4 w-4" />
+                          <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
-                          <Eye className="mr-2 h-4 w-4" />
+                          <Eye className="mr-2 w-4 h-4" />
                           Preview
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                          <Edit className="mr-2 h-4 w-4" />
+                          <Edit className="mr-2 w-4 h-4" />
                           Edit
                         </DropdownMenuItem>
                         {article.status === "draft" && (
                           <DropdownMenuItem onClick={() => handleStatusChange(article.id, "published")} disabled={isMutating}>
-                            <CheckCircle className="mr-2 h-4 w-4" />
+                            <CheckCircle className="mr-2 w-4 h-4" />
                             Publish
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(article.id)} disabled={isMutating}>
-                          <Trash2 className="mr-2 h-4 w-4" />
+                          <Trash2 className="mr-2 w-4 h-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -199,7 +199,7 @@ export function DraftArticleTable({ initialArticles, initialStats }: DraftArticl
             </TableBody>
           </Table>
           {articles.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="py-8 text-muted-foreground text-center">
               No articles found. Generate your first article to get started.
             </div>
           )}

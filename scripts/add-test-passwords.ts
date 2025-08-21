@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { users } from "../lib/schema.js";
-import { eq } from "drizzle-orm";
+// import { users } from "../lib/schema.js";
+// import { eq } from "drizzle-orm";
 import { config } from "dotenv";
 import bcrypt from "bcryptjs";
 

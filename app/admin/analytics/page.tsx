@@ -21,6 +21,29 @@ import {
 } from "lucide-react"
 import { useAllAnalytics, usePageView } from "@/hooks/useAnalytics"
 
+interface TopArticle {
+    title: string;
+    views?: number;
+    readTime: string; // Assuming it's a string like "5 min" or similar
+}
+
+interface TrafficSource {
+    source: string;
+    visitors?: number;
+    percentage: number;
+}
+
+interface DeviceType {
+    device: "Desktop" | "Mobile" | "Tablet";
+    percentage: number;
+}
+
+interface RecentActivity {
+    action: string;
+    article?: string;
+    time: string;
+}
+
 export default function AnalyticsPage() {
     // Track page view
     usePageView("/admin/analytics")
@@ -48,7 +71,7 @@ export default function AnalyticsPage() {
                 {/* Header */}
                 <div className="glass-light rounded-lg p-6">
                     <h1 className="text-3xl font-bold mb-2">Analytics Dashboard</h1>
-                    <p className="text-muted-foreground">Track your blog's performance and engagement metrics.</p>
+                    <p className="text-muted-foreground">Track your blog&apos;s performance and engagement metrics.</p>
                 </div>
 
                 {/* Key Metrics */}
@@ -140,7 +163,7 @@ export default function AnalyticsPage() {
                                 <>
                                     <div className="text-2xl font-bold">{overview.data?.bounceRate || 0}%</div>
                                     <div className="flex items-center text-xs">
-                                        <TrendingDown className="h-3 w-3 text-green-500 mr-1" />
+                                        <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
                                         <span className="text-green-500">{overview.data?.bounceRateChange || 0}%</span>
                                         <span className="text-muted-foreground ml-1">from last month</span>
                                     </div>
@@ -165,7 +188,7 @@ export default function AnalyticsPage() {
                                     <Skeleton key={index} className="h-16 w-full" />
                                 ))
                             ) : (
-                                topArticles.data?.map((article: any, index: number) => (
+                                topArticles.data?.map((article: TopArticle, index: number) => (
                                     <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
                                         <div className="flex-1">
                                             <div className="font-medium text-sm">{article.title}</div>
@@ -197,7 +220,7 @@ export default function AnalyticsPage() {
                                     </div>
                                 ))
                             ) : (
-                                trafficSources.data?.map((source: any, index: number) => (
+                                trafficSources.data?.map((source: TrafficSource, index: number) => (
                                     <div key={index} className="space-y-2">
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium">{source.source}</span>
@@ -234,7 +257,7 @@ export default function AnalyticsPage() {
                                     <Skeleton key={index} className="h-16 w-full" />
                                 ))
                             ) : (
-                                deviceTypes.data?.map((device: any, index: number) => {
+                                deviceTypes.data?.map((device: DeviceType, index: number) => {
                                     const IconComponent = device.device === "Desktop" ? Monitor :
                                         device.device === "Mobile" ? Smartphone : Tablet
                                     return (
@@ -268,7 +291,7 @@ export default function AnalyticsPage() {
                                     <Skeleton key={index} className="h-16 w-full" />
                                 ))
                             ) : (
-                                recentActivity.data?.map((activity: any, index: number) => (
+                                recentActivity.data?.map((activity: RecentActivity, index: number) => (
                                     <div key={index} className="flex items-start space-x-3 p-3 rounded-lg border">
                                         <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>
                                         <div className="flex-1">

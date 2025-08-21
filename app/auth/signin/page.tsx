@@ -13,7 +13,7 @@ export default function SignInPage() {
       <div className="w-full max-w-md space-y-4">
         <SignInForm />
         <p className="text-center text-sm text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/auth/signup" className="text-primary hover:underline">
             Sign up
           </Link>

@@ -166,7 +166,7 @@ export function ArticleGenerationNotification({
           </div>
 
           <p className="text-xs text-muted-foreground text-center">
-            If you don't take action, the article will be published automatically.
+            If you don&apos;t take action, the article will be published automatically.
           </p>
         </CardContent>
       </Card>

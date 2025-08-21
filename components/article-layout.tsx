@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import rehypeRaw from "rehype-raw"
 import { CodeBlock } from "./code-block"
+import type { Components } from "react-markdown"
 
 interface ArticleLayoutProps {
   children?: ReactNode
@@ -39,7 +40,7 @@ export function ArticleLayout({
   }
 
   return (
-    <article className="glass rounded-lg overflow-hidden max-w-4xl mx-auto">
+    <article className="mx-auto rounded-lg max-w-4xl overflow-hidden glass">
       {coverImageUrl && (
         <div className="relative">
           <img
@@ -49,7 +50,7 @@ export function ArticleLayout({
           />
           {coverImageAttribution && (
             <div
-              className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm"
+              className="right-2 bottom-2 absolute bg-black/50 backdrop-blur-sm px-2 py-1 rounded text-white text-xs"
               dangerouslySetInnerHTML={{ __html: coverImageAttribution }}
             />
           )}
@@ -58,8 +59,8 @@ export function ArticleLayout({
 
       <div className="p-8">
         {title && (
-          <header className="mb-8 border-b border-border/20 pb-6">
-            <h1 className="text-4xl font-bold mb-4 text-foreground">{title}</h1>
+          <header className="mb-8 pb-6 border-b border-border/20">
+            <h1 className="mb-4 font-bold text-foreground text-4xl">{title}</h1>
             <div className="flex items-center gap-4 text-muted-foreground text-sm">
               {author && <span>By {author}</span>}
               {publishedAt && <span>•</span>}
@@ -68,7 +69,7 @@ export function ArticleLayout({
             {tags && tags.length > 0 && (
               <div className="flex gap-2 mt-4">
                 {tags.map((tag) => (
-                  <span key={tag} className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs">
+                  <span key={tag} className="bg-primary/10 px-2 py-1 rounded-md text-primary text-xs">
                     {tag}
                   </span>
                 ))}
@@ -76,23 +77,25 @@ export function ArticleLayout({
             )}
           </header>
         )}
-        <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:border prose-blockquote:border-l-primary">
+        <div className="prose-pre:bg-muted dark:prose-invert prose-pre:border prose-blockquote:border-l-primary max-w-none prose-code:text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose prose-lg">
           {content ? (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
               components={{
-                h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4 text-foreground">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-2xl font-semibold mt-6 mb-3 text-foreground">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-xl font-medium mt-4 mb-2 text-foreground">{children}</h3>,
-                p: ({ children }) => <p className="mb-4 leading-relaxed text-foreground">{children}</p>,
-                ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>,
+                h1: ({ children }) => <h1 className="mt-8 mb-4 font-bold text-foreground text-3xl">{children}</h1>,
+                h2: ({ children }) => <h2 className="mt-6 mb-3 font-semibold text-foreground text-2xl">{children}</h2>,
+                h3: ({ children }) => <h3 className="mt-4 mb-2 font-medium text-foreground text-xl">{children}</h3>,
+                p: ({ children }) => <p className="mb-4 text-foreground leading-relaxed">{children}</p>,
+                ul: ({ children }) => <ul className="space-y-2 mb-4 list-disc list-inside">{children}</ul>,
+                ol: ({ children }) => <ol className="space-y-2 mb-4 list-decimal list-inside">{children}</ol>,
                 li: ({ children }) => <li className="text-foreground">{children}</li>,
-                code: ({ inline, children, className, ...props }: any) => {
-                  if (inline) {
+                code: (({ node, children, className }) => {
+                  // @ts-expect-error: 'node' is a hast element, and 'inline' is a property on it
+                  const isInline = node?.inline
+                  if (isInline) {
                     return (
-                      <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono text-foreground">{children}</code>
+                      <code className="bg-muted px-1 py-0.5 rounded font-mono text-foreground text-sm">{children}</code>
                     )
                   }
 
@@ -101,12 +104,12 @@ export function ArticleLayout({
                   const codeString = String(children).replace(/\n$/, "")
 
                   return <CodeBlock language={language}>{codeString}</CodeBlock>
-                },
+                }) as Components["code"],
                 pre: ({ children }) => {
                   return <>{children}</>
                 },
                 blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground">
+                  <blockquote className="my-4 pl-4 border-primary border-l-4 text-muted-foreground italic">
                     {children}
                   </blockquote>
                 ),
