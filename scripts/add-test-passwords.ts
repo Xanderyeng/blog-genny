@@ -8,7 +8,7 @@ import bcrypt from "bcryptjs";
 // Load environment variables
 config({ path: ".env.local" });
 
-const connectionString = process.env.DATABASE_URL || "postgresql://postgres:password@localhost:5432/blog_generator_dev";
+const connectionString = process.env.DATABASE_URL || "postgres://postgres:1lBwoD7v46jST9sOg1X5TKKYWB8gX7Nygt5G1sO7RAkqRhKVwfMPL7Zrx3kwtXdZ@217.77.2.253:5432/postgres";
 
 async function addTestUserPasswords() {
     const client = postgres(connectionString, { max: 1 });
