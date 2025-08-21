@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -22,7 +21,6 @@ export function GenerateForm() {
     title: string
     slug: string
   } | null>(null)
-  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,7 +75,7 @@ export function GenerateForm() {
       <Card className="glass">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <PenTool className="h-5 w-5" />
+            <PenTool className="w-5 h-5" />
             Blog Post Details
           </CardTitle>
           <CardDescription>Provide a topic and any specific instructions for your blog post.</CardDescription>
@@ -85,7 +83,7 @@ export function GenerateForm() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="topic" className="text-sm font-medium">
+              <label htmlFor="topic" className="font-medium text-sm">
                 Topic *
               </label>
               <Input
@@ -97,11 +95,11 @@ export function GenerateForm() {
                 disabled={isGenerating}
                 className="w-full"
               />
-              <p className="text-xs text-muted-foreground">What would you like to write about?</p>
+              <p className="text-muted-foreground text-xs">What would you like to write about?</p>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="customPrompt" className="text-sm font-medium">
+              <label htmlFor="customPrompt" className="font-medium text-sm">
                 Additional Instructions (Optional)
               </label>
               <Textarea
@@ -112,26 +110,26 @@ export function GenerateForm() {
                 disabled={isGenerating}
                 className="w-full min-h-[100px]"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Any specific requirements or style preferences for your blog post.
               </p>
             </div>
 
             {error && (
-              <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
-                <p className="text-sm text-destructive">{error}</p>
+              <div className="bg-destructive/10 p-3 border border-destructive/20 rounded-md">
+                <p className="text-destructive text-sm">{error}</p>
               </div>
             )}
 
             <Button type="submit" disabled={isGenerating || !topic.trim()} className="w-full">
               {isGenerating ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 w-4 h-4 animate-spin" />
                   Generating your blog post...
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Sparkles className="mr-2 w-4 h-4" />
                   Generate Blog Post
                 </>
               )}
