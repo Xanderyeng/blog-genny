@@ -1,4 +1,5 @@
 import type { NextAuthOptions } from "next-auth"
+import { v4 as uuidv4 } from 'uuid';
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import GitHubProvider from "next-auth/providers/github"
@@ -57,7 +58,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       if (account && user) {
         // This is the first sign-in
-        const { v4: uuidv4 } = require('uuid');
+        token.role = user.role
         const dbUser = await db.select().from(users).where(eq(users.email, user.email!)).limit(1)
         if (!dbUser[0]) {
           // Create a new user if one doesn't exist
@@ -82,6 +83,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub!
         session.user.role = token.role as "user" | "admin"
         session.user.tier = token.tier as "free" | "premium"
+        session.user.image = token.picture
       }
       return session
     },
