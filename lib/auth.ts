@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
+import GitHubProvider from "next-auth/providers/github"
 import { db } from "@/lib/db"
 import { users } from "@/lib/schema"
 import { eq } from "drizzle-orm"
@@ -44,21 +45,34 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID || "",
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+    }),
   ],
   session: {
     strategy: "jwt",
   },
   callbacks: {
     async jwt({ token, user, account }) {
-      if (user) {
-        token.role = user.role
-        token.tier = user.tier
-      } else if (account?.provider === "google" && token.email) {
-        // Fetch user data from database for Google sign-ins
-        const dbUser = await db.select().from(users).where(eq(users.email, token.email)).limit(1)
-        if (dbUser[0]) {
-          token.role = dbUser[0].role as "user" | "admin"
-          token.tier = dbUser[0].tier as "free" | "premium"
+      if (account && user) {
+        // This is the first sign-in
+        const { v4: uuidv4 } = require('uuid');
+        const dbUser = await db.select().from(users).where(eq(users.email, user.email!)).limit(1)
+        if (!dbUser[0]) {
+          // Create a new user if one doesn't exist
+          const newUser = await db.insert(users).values({
+            id: uuidv4(),
+            email: user.email!,
+            name: user.name,
+            role: "user",
+            tier: "free",
+          }).returning()
+          token.role = newUser[0].role
+          token.tier = newUser[0].tier
+        } else {
+          token.role = dbUser[0].role
+          token.tier = dbUser[0].tier
         }
       }
       return token
