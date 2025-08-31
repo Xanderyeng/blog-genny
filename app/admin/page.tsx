@@ -63,13 +63,11 @@ export default async function AdminDashboard() {
       }))
     : []
 
-  const stats: ArticleStats = (statsResult.success && statsResult.data)
-    ? {
-        draft: Number(statsResult.data.draft) ?? 0,
-        published: Number(statsResult.data.published) ?? 0,
-        archived: Number(statsResult.data.archived) ?? 0
-      }
-    : { draft: 0, published: 0, archived: 0 }
+  const stats: ArticleStats = {
+    draft: statsResult.data?.draft ?? 0,
+    published: statsResult.data?.published ?? 0,
+    archived: statsResult.data?.archived ?? 0,
+  }
 
   return (
     <AdminDashboardLayout>

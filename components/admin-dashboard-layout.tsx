@@ -55,25 +55,25 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
   const pathname = usePathname()
 
   const Sidebar = ({ className }: { className?: string }) => (
-    <div className={cn("flex h-full flex-col", className)}>
-      <div className="flex h-16 items-center border-b px-6">
+    <div className={cn("flex flex-col h-full", className)}>
+      <div className="flex items-center px-6 border-b h-16">
         <Link href="/admin" className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">BG</span>
+          <div className="flex justify-center items-center bg-primary rounded-lg w-8 h-8">
+            <span className="font-bold text-primary-foreground text-sm">BG</span>
           </div>
           <span className="font-semibold">Blog Genny Admin</span>
         </Link>
       </div>
 
       {/* Sign Out Button - Right after title */}
-      <div className="border-b px-4 py-3">
+      <div className="px-4 py-3 border-b">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent"
+          className="justify-start hover:bg-accent w-full text-muted-foreground hover:text-foreground"
           onClick={() => signOut({ callbackUrl: "/" })}
         >
-          <LogOut className="h-4 w-4 mr-3" />
+          <LogOut className="mr-3 w-4 h-4" />
           Sign Out
         </Button>
       </div>
@@ -86,27 +86,27 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center space-x-3 px-3 py-2 rounded-lg font-medium text-sm transition-colors",
                 isActive
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="w-4 h-4" />
               <span>{item.name}</span>
             </Link>
           )
         })}
       </nav>
 
-      <div className="border-t p-4">
+      <div className="p-4 border-t">
         <div className="flex items-center space-x-3">
-          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-            <span className="text-xs font-medium">A</span>
+          <div className="flex justify-center items-center bg-muted rounded-full w-8 h-8">
+            <span className="font-medium text-xs">A</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">Admin User</p>
-            <p className="text-xs text-muted-foreground">admin@blog-genny.com</p>
+            <p className="font-medium text-sm">Admin User</p>
+            <p className="text-muted-foreground text-xs">admin@blog-genny.com</p>
           </div>
           <Badge variant="secondary" className="text-xs">
             Admin
@@ -117,37 +117,37 @@ export function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
   )
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex bg-background h-screen">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:w-64 lg:flex-col lg:border-r">
+      <div className="hidden lg:flex lg:flex-col lg:border-r lg:w-64">
         <Sidebar />
       </div>
 
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="lg:hidden fixed top-4 left-4 z-40 glass bg-background/20 rounded-xl">
-            <Menu className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="lg:hidden top-4 left-4 z-40 fixed bg-background/20 rounded-xl glass">
+            <Menu className="w-5 h-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
+        <SheetContent side="left" className="p-0 w-64">
           <Sidebar />
         </SheetContent>
       </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
+      <div className="relative flex flex-col flex-1 overflow-hidden">
         {/* Floating Theme Toggle */}
-        <div className="fixed top-6 right-6 z-50">
-          <div className="glass bg-background/20 rounded-xl p-3 shadow-lg transition-all duration-200 hover:shadow-xl">
+        <div className="top-6 right-6 z-50 fixed">
+          <div className="bg-background/20 shadow-lg hover:shadow-xl p-3 rounded-xl transition-all duration-200 glass">
             <ThemeToggle />
           </div>
         </div>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="glass-light border-0">
+          <div className="border-0 glass-light">
             <div className="px-6 py-3.25">
-              <h1 className="text-2xl font-semibold">
+              <h1 className="font-semibold text-2xl">
                 {navigation.find((item) => item.href === pathname)?.name || "Dashboard"}
               </h1>
             </div>

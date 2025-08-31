@@ -21,16 +21,16 @@ export default async function UsersPage() {
     <AdminDashboardLayout>
       <div className="space-y-6">
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Users</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
+            {/* <h1 className="font-bold text-2xl sm:text-3xl tracking-tight">Users</h1> */}
+            <p className="text-muted-foreground text-sm sm:text-base">
               Manage user accounts, roles, and subscriptions
             </p>
           </div>
           <Button asChild className="self-start sm:self-auto">
             <Link href="/admin/users/new">
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="mr-2 w-4 h-4" />
               <span className="hidden sm:inline">Add User</span>
               <span className="sm:hidden">Add</span>
             </Link>
@@ -39,9 +39,9 @@ export default async function UsersPage() {
 
       {/* Statistics Section */}
       <Suspense fallback={
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 bg-muted animate-pulse rounded-lg" />
+            <div key={i} className="bg-muted rounded-lg h-24 animate-pulse" />
           ))}
         </div>
       }>
@@ -50,7 +50,7 @@ export default async function UsersPage() {
 
       {/* Users Table Section */}
       <Suspense fallback={
-        <div className="bg-muted animate-pulse rounded-lg h-96" />
+        <div className="bg-muted rounded-lg h-96 animate-pulse" />
       }>
         <UsersTable />
       </Suspense>

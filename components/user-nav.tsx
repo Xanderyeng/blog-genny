@@ -51,8 +51,8 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="relative rounded-full w-8 h-8">
+          <Avatar className="w-8 h-8">
             <AvatarImage src={session.user.image || ""} alt={session.user.name || ""} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
@@ -61,8 +61,8 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{session.user.name}</p>
-            <p className="text-xs leading-none text-muted-foreground">{session.user.email}</p>
+            <p className="font-medium text-sm leading-none">{session.user.name}</p>
+            <p className="text-muted-foreground text-xs leading-none">{session.user.email}</p>
             <div className="flex items-center space-x-2 pt-1">
               <Badge variant={session.user.role === "admin" ? "default" : "secondary"}>{session.user.role}</Badge>
               <Badge variant="outline">{session.user.tier}</Badge>
@@ -72,20 +72,20 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/dashboard/settings">
-            <User className="mr-2 h-4 w-4" />
+            <User className="mr-2 w-4 h-4" />
             Profile & Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/dashboard/articles">
-            <FileText className="mr-2 h-4 w-4" />
+            <FileText className="mr-2 w-4 h-4" />
             My Articles
           </Link>
         </DropdownMenuItem>
         {(session.user.tier === "premium" || session.user.role === "admin") && (
           <DropdownMenuItem asChild>
             <Link href="/dashboard/analytics">
-              <BarChart3 className="mr-2 h-4 w-4" />
+              <BarChart3 className="mr-2 w-4 h-4" />
               Analytics
             </Link>
           </DropdownMenuItem>
@@ -93,7 +93,7 @@ export function UserNav() {
         {session.user.tier === "premium" && (
           <DropdownMenuItem asChild>
             <Link href="/dashboard/settings?tab=billing">
-              <Crown className="mr-2 h-4 w-4" />
+              <Crown className="mr-2 w-4 h-4" />
               Billing & Subscription
             </Link>
           </DropdownMenuItem>
@@ -101,14 +101,14 @@ export function UserNav() {
         {session.user.role === "admin" && (
           <DropdownMenuItem asChild>
             <Link href="/admin">
-              <Shield className="mr-2 h-4 w-4" />
+              <Shield className="mr-2 w-4 h-4" />
               Admin Dashboard
             </Link>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-2 w-4 h-4" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

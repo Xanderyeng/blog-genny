@@ -236,29 +236,32 @@ export async function getArticleByIdOrSlug(identifier: string) {
 // Get article stats (for analytics)
 export async function getArticleStats() {
   try {
-    const totalArticles = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(articles)
-
-    const publishedArticles = await db
+    const publishedResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(articles)
       .where(eq(articles.status, "published"))
 
-    // Placeholder for views - implement actual view tracking if needed
-    const totalViews = 0 // This would come from a separate view tracking mechanism
+    const draftResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(articles)
+      .where(eq(articles.status, "draft"))
+
+    const archivedResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(articles)
+      .where(eq(articles.status, "archived"))
 
     return {
-      totalArticles: totalArticles[0].count,
-      publishedArticles: publishedArticles[0].count,
-      totalViews,
+      published: publishedResult[0].count,
+      draft: draftResult[0].count,
+      archived: archivedResult[0].count,
     }
   } catch (error) {
     console.error("Error getting article stats:", error)
     return {
-      totalArticles: 0,
-      publishedArticles: 0,
-      totalViews: 0,
+      published: 0,
+      draft: 0,
+      archived: 0,
     }
   }
 }
