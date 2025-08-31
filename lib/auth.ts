@@ -1,5 +1,5 @@
 import type { NextAuthOptions } from "next-auth"
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv7 } from "uuidv7";
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import GitHubProvider from "next-auth/providers/github"
@@ -63,17 +63,20 @@ export const authOptions: NextAuthOptions = {
         if (!dbUser[0]) {
           // Create a new user if one doesn't exist
           const newUser = await db.insert(users).values({
-            id: uuidv4(),
+            id: uuidv7(),
             email: user.email!,
             name: user.name,
+            image: user.image,
             role: "user",
             tier: "free",
           }).returning()
           token.role = newUser[0].role
           token.tier = newUser[0].tier
+          token.picture = newUser[0].image;
         } else {
           token.role = dbUser[0].role
           token.tier = dbUser[0].tier
+          token.picture = dbUser[0].image;
         }
       }
       return token
@@ -84,6 +87,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as "user" | "admin"
         session.user.tier = token.tier as "free" | "premium"
         session.user.image = token.picture
+        console.log("Current session:", session);
       }
       return session
     },

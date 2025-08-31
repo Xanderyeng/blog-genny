@@ -39,7 +39,8 @@ import {
   Filter,
   Edit,
   Eye,
-  Key
+  Key,
+  Trash2Icon
 } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
@@ -140,6 +141,26 @@ export function UsersTable() {
     setIsResetDialogOpen(true)
   }
 
+  // delete user
+
+  async function deleteUser(userId: string) {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        setUsers(users.filter(user => user.id !== userId))
+        toast.success("User deleted successfully")
+      } else {
+        toast.error("Failed to delete user")
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error)
+      toast.error("Failed to delete user")
+    }
+  }
+
   // Filter users based on search term and filters
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -167,12 +188,12 @@ export function UsersTable() {
         <CardContent>
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="h-10 w-64 bg-muted animate-pulse rounded" />
-              <div className="h-10 w-32 bg-muted animate-pulse rounded" />
-              <div className="h-10 w-32 bg-muted animate-pulse rounded" />
+              <div className="bg-muted rounded w-64 h-10 animate-pulse" />
+              <div className="bg-muted rounded w-32 h-10 animate-pulse" />
+              <div className="bg-muted rounded w-32 h-10 animate-pulse" />
             </div>
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 bg-muted animate-pulse rounded" />
+              <div key={i} className="bg-muted rounded h-16 animate-pulse" />
             ))}
           </div>
         </CardContent>
@@ -189,9 +210,9 @@ export function UsersTable() {
         <CardContent>
           <div className="space-y-4">
             {/* Filters - Mobile Responsive */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            <div className="flex sm:flex-row flex-col sm:items-center gap-3">
               <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="top-1/2 left-3 absolute w-4 h-4 text-muted-foreground -translate-y-1/2" />
                 <Input
                   placeholder="Search users..."
                   value={searchTerm}
@@ -226,30 +247,30 @@ export function UsersTable() {
             </div>
 
             {/* Users Table - Mobile Responsive */}
-            <div className="rounded-md border overflow-hidden">
+            <div className="border rounded-md overflow-hidden">
               {/* Mobile Card View - Only visible on very small screens */}
-              <div className="block sm:hidden">
+              <div className="sm:hidden block">
                 <div className="space-y-3 p-4">
                   {filteredUsers.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="py-8 text-muted-foreground text-center">
                       No users found matching your criteria.
                     </div>
                   ) : (
                     filteredUsers.map((user) => (
                       <Card key={user.id} className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center space-x-3 flex-1 min-w-0">
-                            <Avatar className="h-10 w-10 flex-shrink-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex flex-1 items-center space-x-3 min-w-0">
+                            <Avatar className="flex-shrink-0 w-10 h-10">
                               <AvatarImage src={user.image || undefined} />
                               <AvatarFallback>
                                 {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="min-w-0 flex-1">
+                            <div className="flex-1 min-w-0">
                               <div className="font-medium truncate">
                                 {user.name || "Unnamed User"}
                               </div>
-                              <div className="text-sm text-muted-foreground truncate">
+                              <div className="text-muted-foreground text-sm truncate">
                                 {user.email}
                               </div>
                               <div className="flex gap-1 mt-2">
@@ -259,42 +280,42 @@ export function UsersTable() {
                                 <Badge variant={getTierBadgeVariant(user.tier)} className="text-xs">
                                   {user.tier}
                                   {user.tier === "premium" && (
-                                    <Crown className="h-2 w-2 ml-1 text-yellow-500" />
+                                    <Crown className="ml-1 w-2 h-2 text-yellow-500" />
                                   )}
                                 </Badge>
                               </div>
-                              <div className="text-xs text-muted-foreground mt-1">
+                              <div className="mt-1 text-muted-foreground text-xs">
                                 {user._count?.articles || 0} articles • Joined {new Date(user.createdAt).toLocaleDateString()}
                               </div>
                             </div>
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
-                                <MoreHorizontal className="h-4 w-4" />
+                              <Button variant="ghost" size="sm" className="flex-shrink-0 p-0 w-8 h-8">
+                                <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuItem asChild>
                                 <Link href={`/admin/users/${user.id}`}>
-                                  <Eye className="h-4 w-4 mr-2" />
+                                  <Eye className="mr-2 w-4 h-4" />
                                   View Details
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
                                 <Link href={`/admin/users/${user.id}`}>
-                                  <Edit className="h-4 w-4 mr-2" />
+                                  <Edit className="mr-2 w-4 h-4" />
                                   Edit User
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleResetPasswordClick(user)}>
-                                <Key className="h-4 w-4 mr-2" />
+                                <Key className="mr-2 w-4 h-4" />
                                 Reset Password
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem asChild>
                                 <a href={`mailto:${user.email}`}>
-                                  <Mail className="h-4 w-4 mr-2" />
+                                  <Mail className="mr-2 w-4 h-4" />
                                   Send Email
                                 </a>
                               </DropdownMenuItem>
@@ -323,7 +344,7 @@ export function UsersTable() {
                   <TableBody>
                   {filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      <TableCell colSpan={6} className="text-muted-foreground text-center">
                         No users found
                       </TableCell>
                     </TableRow>
@@ -332,28 +353,28 @@ export function UsersTable() {
                       <TableRow key={user.id} className="hover:bg-muted/50">
                         <TableCell>
                           <div className="flex items-center space-x-3">
-                            <Avatar className="h-8 w-8 flex-shrink-0">
+                            <Avatar className="flex-shrink-0 w-8 h-8">
                               <AvatarImage src={user.image || undefined} />
                               <AvatarFallback>
                                 {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="min-w-0 flex-1">
+                            <div className="flex-1 min-w-0">
                               <div className="font-medium truncate">
                                 {user.name || "Unnamed User"}
                               </div>
-                              <div className="text-sm text-muted-foreground truncate">
+                              <div className="text-muted-foreground text-sm truncate">
                                 {user.email}
                               </div>
                               {/* Mobile-only badges */}
-                              <div className="flex gap-1 mt-1 sm:hidden">
+                              <div className="sm:hidden flex gap-1 mt-1">
                                 <Badge variant={getRoleBadgeVariant(user.role)} className="text-xs">
                                   {user.role}
                                 </Badge>
                                 <Badge variant={getTierBadgeVariant(user.tier)} className="text-xs">
                                   {user.tier}
                                   {user.tier === "premium" && (
-                                    <Crown className="h-2 w-2 ml-1 text-yellow-500" />
+                                    <Crown className="ml-1 w-2 h-2 text-yellow-500" />
                                   )}
                                 </Badge>
                               </div>
@@ -371,7 +392,7 @@ export function UsersTable() {
                               {user.tier}
                             </Badge>
                             {user.tier === "premium" && (
-                              <Crown className="h-3 w-3 text-yellow-500" />
+                              <Crown className="w-3 h-3 text-yellow-500" />
                             )}
                           </div>
                         </TableCell>
@@ -381,8 +402,8 @@ export function UsersTable() {
                           </span>
                         </TableCell>
                         <TableCell className="hidden lg:table-cell">
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Calendar className="h-3 w-3" />
+                          <div className="flex items-center space-x-1 text-muted-foreground text-sm">
+                            <Calendar className="w-3 h-3" />
                             <span>
                               {new Date(user.createdAt).toLocaleDateString()}
                             </span>
@@ -391,31 +412,31 @@ export function UsersTable() {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
+                              <Button variant="ghost" size="sm" className="p-0 w-8 h-8">
+                                <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
                               <DropdownMenuItem asChild>
                                 <Link href={`/admin/users/${user.id}`}>
-                                  <Eye className="h-4 w-4 mr-2" />
+                                  <Eye className="mr-2 w-4 h-4" />
                                   View Details
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem asChild>
                                 <Link href={`/admin/users/${user.id}`}>
-                                  <Edit className="h-4 w-4 mr-2" />
+                                  <Edit className="mr-2 w-4 h-4" />
                                   Edit User
                                 </Link>
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleResetPasswordClick(user)}>
-                                <Key className="h-4 w-4 mr-2" />
+                                <Key className="mr-2 w-4 h-4" />
                                 Reset Password
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem asChild>
                                 <a href={`mailto:${user.email}`}>
-                                  <Mail className="h-4 w-4 mr-2" />
+                                  <Mail className="mr-2 w-4 h-4" />
                                   Send Email
                                 </a>
                               </DropdownMenuItem>
@@ -426,14 +447,14 @@ export function UsersTable() {
                                 <DropdownMenuItem
                                   onClick={() => updateUserRole(user.id, "admin")}
                                 >
-                                  <UserCheck className="h-4 w-4 mr-2" />
+                                  <UserCheck className="mr-2 w-4 h-4" />
                                   Make Admin
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
                                   onClick={() => updateUserRole(user.id, "user")}
                                 >
-                                  <UserX className="h-4 w-4 mr-2" />
+                                  <UserX className="mr-2 w-4 h-4" />
                                   Remove Admin
                                 </DropdownMenuItem>
                               )}
@@ -443,17 +464,22 @@ export function UsersTable() {
                                 <DropdownMenuItem
                                   onClick={() => updateUserTier(user.id, "premium")}
                                 >
-                                  <Crown className="h-4 w-4 mr-2" />
+                                  <Crown className="mr-2 w-4 h-4 text-yellow-600" />
                                   Upgrade to Premium
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem
                                   onClick={() => updateUserTier(user.id, "free")}
                                 >
-                                  <UserX className="h-4 w-4 mr-2" />
+                                  <UserX className="mr-2 w-4 h-4" />
                                   Downgrade to Free
                                 </DropdownMenuItem>
                               )}
+                              {/* Delete User */}
+                              <DropdownMenuItem onClick={() => deleteUser(user.id)} className='bg-red-600/30 hover:bg-red-900/40'>
+                                <Trash2Icon className="mr-2 w-4 h-4" />
+                                Delete User
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
