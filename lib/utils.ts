@@ -13,3 +13,11 @@ export function formatDate(dateString: string): string {
     day: "numeric",
   })
 }
+
+// ✅ Add the reading time function here
+export function getReadingTime(content: string): string {
+  const wordsPerMinute = 200
+  const words = content.split(/\s+/).length
+  const minutes = Math.ceil(words / wordsPerMinute)
+  return `${minutes} min read`
+}

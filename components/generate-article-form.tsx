@@ -10,8 +10,14 @@ import { PenTool, Loader2, Sparkles } from "lucide-react"
 import { generateBlog } from "@/app/actions/generateBlog"
 import { ArticleGenerationNotification } from "@/components/article-generation-notification"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
-export function GenerateForm() {
+// Add a new prop for the success callback
+interface GenerateFormProps {
+  onGenerationSuccess?: () => void;
+}
+
+export function GenerateForm({ onGenerationSuccess }: GenerateFormProps) {
   const [topic, setTopic] = useState("")
   const [customPrompt, setCustomPrompt] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
@@ -21,6 +27,8 @@ export function GenerateForm() {
     title: string
     slug: string
   } | null>(null)
+
+  const router = useRouter(); // Initialize the router
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,23 +47,21 @@ export function GenerateForm() {
       const result = await generateBlog(fullPrompt)
 
       if (result.success && result.articleId && result.slug) {
-        // Get the article title by fetching the article data
-        const articleResponse = await fetch(`/api/articles/${result.articleId}`)
-        const articleData = await articleResponse.json()
+        toast.success("Article generated successfully!");
         
-        // Show success toast
-        toast.success("Article generated successfully!")
-        
-        // Show the notification modal
         setGeneratedArticle({
           id: result.articleId,
-          title: articleData.title || topic,
+          title: "Untitled Article", // Placeholder
           slug: result.slug
-        })
-        
-        // Reset form
-        setTopic("")
-        setCustomPrompt("")
+        });
+
+        // ✅ Call the success callback to close the dialog
+        if (onGenerationSuccess) {
+          onGenerationSuccess();
+        }
+
+        // ✅ Refresh the current page to display the new article in the list
+        router.refresh();
       } else {
         setError(result.error || "Failed to generate blog post. Please try again.")
         toast.error(result.error || "Failed to generate blog post")
@@ -76,9 +82,9 @@ export function GenerateForm() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <PenTool className="w-5 h-5" />
-            Blog Post Details
+            Blog Article Details
           </CardTitle>
-          <CardDescription>Provide a topic and any specific instructions for your blog post.</CardDescription>
+          <CardDescription>Provide a topic and any specific instructions for your blog article.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -111,7 +117,7 @@ export function GenerateForm() {
                 className="w-full min-h-[100px]"
               />
               <p className="text-muted-foreground text-xs">
-                Any specific requirements or style preferences for your blog post.
+                Any specific requirements or style preferences for your blog article.
               </p>
             </div>
 
@@ -125,12 +131,12 @@ export function GenerateForm() {
               {isGenerating ? (
                 <>
                   <Loader2 className="mr-2 w-4 h-4 animate-spin" />
-                  Generating your blog post...
+                  Generating your blog article...
                 </>
               ) : (
                 <>
                   <Sparkles className="mr-2 w-4 h-4" />
-                  Generate Blog Post
+                  Generate Blog Article
                 </>
               )}
             </Button>

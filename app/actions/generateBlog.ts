@@ -5,6 +5,9 @@ import { findHeroImage } from "@/lib/images"
 import { createArticle } from "@/lib/articles"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
+import { db } from "@/lib/db" // ✅ 
+import { users } from "@/lib/schema"
+import { eq } from "drizzle-orm"
 
 interface GenerateBlogResult {
   success: boolean
@@ -17,11 +20,21 @@ export async function generateBlog(topic: string): Promise<GenerateBlogResult> {
   try {
     // Check if user is authenticated
     const session = await getServerSession(authOptions)
-    if (!session?.user?.id) {
+    if (!session?.user?.email) {
       return {
         success: false,
         error: "You must be logged in to generate blog posts.",
       }
+    }
+// ✅ Step 1: Find the user in the database using their email
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, session.user.email))
+
+    // ✅ Step 2: Ensure the user exists in your database
+    if (!user) {
+      return { success: false, error: "User not found in the database." }
     }
 
     if (!process.env.GEMINI_API_KEY) {
@@ -138,12 +151,13 @@ CRITICAL: Make sure the JSON is valid and properly escaped. Use only standard ma
     // Find hero image for the article
     const heroImageData = await findHeroImage(articleData.title)
 
+    // ✅ Step 3: Pass the correct database ID to createArticle
     // Create the article in the database
     const articleResult = await createArticle({
       title: articleData.title,
       content: sanitizedContent,
       description: articleData.description,
-      authorId: session.user.id,
+      authorId: user.id,
       coverImageUrl: heroImageData?.imageUrl,
       coverImageAttribution: heroImageData?.attribution,
       metaTitle: articleData.title,

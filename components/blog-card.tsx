@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Clock } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 
-interface BlogPost {
+export interface BlogPost {
   slug: string
   title: string
   description: string
@@ -23,23 +23,23 @@ interface BlogCardProps {
 
 export function BlogCard({ post }: BlogCardProps) {
   return (
-    <Card className="h-full hover:shadow-lg transition-shadow pt-0 overflow-hidden">
+    <Card className="hover:shadow-lg pt-0 h-full overflow-hidden transition-shadow">
       {/* Cover Image */}
       {post.coverImageUrl && (
-        <div className="w-full !pt-0 !mt-0 overflow-hidden">
+        <div className="!mt-0 !pt-0 w-full overflow-hidden">
           <img
             src={post.coverImageUrl}
             alt={post.title}
-            className="w-full aspect-video object-cover transition-transform hover:scale-105"
+            className="w-full object-cover aspect-video hover:scale-105 transition-transform"
           />
         </div>
       )}
 
       <CardHeader>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Calendar className="h-4 w-4" />
+        <div className="flex items-center gap-2 mb-2 text-muted-foreground text-sm">
+          <Calendar className="w-4 h-4" />
           <time dateTime={post.date}>{formatDate(post.date)}</time>
-          <Clock className="h-4 w-4 ml-2" />
+          <Clock className="ml-2 w-4 h-4" />
           <span>{post.readingTime}</span>
         </div>
         <CardTitle className="line-clamp-2">
