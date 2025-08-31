@@ -6,6 +6,7 @@ import { PenTool, Home, Search, Menu, X, User, BookOpen, Settings, TrendingUp } 
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence, easeInOut } from "framer-motion"
+import { UserNav } from "./user-nav"
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -93,6 +94,7 @@ export function Header() {
               </Link>
             </Button>
             <ThemeToggle />
+            <UserNav />
           </div>
 
           <div className="md:hidden flex items-center space-x-2">
