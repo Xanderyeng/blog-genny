@@ -21,8 +21,9 @@ import {
   Trash2,
   LogOut
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { toast } from "sonner"
+import { resetPassword } from "@/app/actions/userActions"
 
 type UserType = {
   id: string
@@ -46,7 +47,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
     new: false,
     confirm: false,
   })
-  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
   const [isEnabling2FA, setIsEnabling2FA] = useState(false)
 
@@ -77,7 +78,7 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
     },
   ]
 
-  const handlePasswordChange = async () => {
+  const handlePasswordChange = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast.error("New passwords don't match")
       return
@@ -88,28 +89,20 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
       return
     }
 
-    setIsChangingPassword(true)
-    try {
-      const response = await fetch("/api/user/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword,
-        }),
+    startTransition(async () => {
+      const result = await resetPassword({
+        userId: user.id,
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
       })
 
-      if (response.ok) {
+      if (result.success) {
         toast.success("Password changed successfully!")
         setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
       } else {
-        toast.error("Failed to change password")
+        toast.error(result.error || "Failed to change password.")
       }
-    } catch (error) {
-      toast.error("An error occurred")
-    } finally {
-      setIsChangingPassword(false)
-    }
+    })
   }
 
   const handleEnable2FA = async () => {
@@ -279,9 +272,9 @@ export function SecuritySettings({ user }: SecuritySettingsProps) {
           <div className="pt-2">
             <Button 
               onClick={handlePasswordChange} 
-              disabled={isChangingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+              disabled={isPending || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
             >
-              {isChangingPassword ? "Changing..." : "Change Password"}
+              {isPending ? "Changing..." : "Change Password"}
             </Button>
           </div>
 
